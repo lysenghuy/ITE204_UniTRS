@@ -1,7 +1,5 @@
--- University Management System (UMS) - MySQL Database Schema
-
-CREATE DATABASE IF NOT EXISTS uc_ums_db;
-USE uc_ums_db;
+CREATE DATABASE IF NOT EXISTS unitrs_db;
+USE unitrs_db;
 
 -- 1. Users Table (Handles Students, Faculty, Deans, and Admins)
 CREATE TABLE IF NOT EXISTS users (
@@ -97,6 +95,6 @@ INSERT IGNORE INTO courses (course_code, course_title, credits) VALUES
 
 -- Seed Initial Staff Roles (Verified staff accounts)
 INSERT IGNORE INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active) VALUES
-('admin', 'admin123', 'System Administrator', 'admin@uc.edu.kh', 'ADMIN', 'IT Infrastructure', TRUE, TRUE),
-('dean@uc.edu.kh', 'dean123', 'Dean of College of Science & Tech', 'dean@uc.edu.kh', 'DEAN', 'Information Technology', TRUE, TRUE),
-('prof.sok@uc.edu.kh', 'prof123', 'Prof. Sok Chan', 'prof.sok@uc.edu.kh', 'PROFESSOR', 'Information Technology', TRUE, TRUE);
+('admin', 'admin123', 'System Administrator', 'admin@unitrs.edu', 'ADMIN', 'IT Infrastructure', TRUE, TRUE),
+('dean@unitrs.edu', 'dean123', 'Dean of Academic Affairs', 'dean@unitrs.edu', 'DEAN', 'Computer Science', TRUE, TRUE),
+('prof.sok@unitrs.edu', 'prof123', 'Prof. Sok Chan', 'prof.sok@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE);
