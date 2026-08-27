@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS class_sections (
     term_id INT NOT NULL,
     course_id INT NOT NULL,
     professor_id INT NOT NULL,
-    session_shift ENUM('MORNING', 'AFTERNOON', 'EVENING') NOT NULL,
+    session_shift ENUM('MORNING', 'AFTERNOON', 'EVENING', 'WEEKEND') NOT NULL,
     room VARCHAR(30) NOT NULL,                   -- e.g. 'Room 504'
     days_of_week VARCHAR(50) NOT NULL,           -- e.g. 'Mon - Fri'
     academic_year VARCHAR(20) NOT NULL,          -- e.g. '2025-2026'

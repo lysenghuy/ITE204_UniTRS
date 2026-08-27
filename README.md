@@ -27,8 +27,8 @@ A 4-tier role-based Jakarta EE web application tailored for the academic, schedu
 
 ## Core Features by Role
 
-- **Student Portal:** University ID-based registration (format: `60-24-04-91`), pending-verification security state, atomic batch term-bundle enrollment, weekly class timetable with shift hours, and dynamic grade transcripts.
-- **Professor Portal:** View assigned sections and shifts (Morning, Afternoon, Evening), inspect class rosters, and submit 4-component continuous assessments (Attendance 15%, Assignments 25%, Midterm 30%, Final 30%) with automated letter grade (A-F) and GPA calculation.
+- **Student Portal:** University ID-based registration (format: `60-24-04-91`), pending-verification security state, atomic batch term-bundle enrollment across shifts (Morning, Afternoon, Evening, Weekend), weekly class timetable, and dynamic grade transcripts.
+- **Professor Portal:** View assigned sections and shifts (Morning, Afternoon, Evening, Weekend), inspect class rosters, and submit 4-component continuous assessments (Attendance 15%, Assignments 25%, Midterm 30%, Final 30%) with automated letter grade (A-F) and GPA calculation.
 - **Dean Portal:** Course catalog management, academic term course bundling (`term_courses`), section scheduling (shift, room, lecturer allocation), and cohort enrollment overview.
 - **Admin Portal:** User account provisioning, role management (Student, Professor, Dean, Admin), credential resets, and identity verification approval for newly registered students.
 
