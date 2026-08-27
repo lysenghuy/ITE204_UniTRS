@@ -8,9 +8,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DBConnection {
 
+    private static final Logger LOGGER = Logger.getLogger(DBConnection.class.getName());
     private static final Properties properties = new Properties();
 
     static {
@@ -20,7 +23,7 @@ public class DBConnection {
             }
             Class.forName(properties.getProperty("db.driver", "com.mysql.cj.jdbc.Driver"));
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "Failed to initialize database driver or properties", e);
         }
     }
 
@@ -38,34 +41,30 @@ public class DBConnection {
             try {
                 rs.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Error closing ResultSet", e);
             }
         }
         if (stmt != null) {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Error closing Statement", e);
             }
         }
         if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
-                e.printStackTrace();
+                LOGGER.log(Level.WARNING, "Error closing Connection", e);
             }
         }
     }
 
-    public static void close(Connection conn, Statement stmt) {
-        close(conn, stmt, null);
-    }
-
     public static void main(String[] args) {
         try (Connection conn = getConnection()) {
-            System.out.println("Database connected: " + conn.getCatalog());
+            LOGGER.info("Database connected successfully: " + conn.getCatalog());
         } catch (SQLException e) {
-            System.err.println("Connection failed: " + e.getMessage());
+            LOGGER.log(Level.SEVERE, "Connection test failed", e);
         }
     }
 }
