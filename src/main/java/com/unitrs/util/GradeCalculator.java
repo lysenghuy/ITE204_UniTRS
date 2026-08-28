@@ -22,19 +22,19 @@ public class GradeCalculator {
     }
 
     public static String calculateLetterGrade(double totalScore) {
-        if (totalScore >= 85.0) {
+        if (totalScore >= 95.0) {
             return "A";
-        } else if (totalScore >= 80.0) {
+        } else if (totalScore >= 89.0) {
             return "B+";
-        } else if (totalScore >= 70.0) {
+        } else if (totalScore >= 83.0) {
             return "B";
-        } else if (totalScore >= 65.0) {
+        } else if (totalScore >= 77.0) {
             return "C+";
-        } else if (totalScore >= 60.0) {
+        } else if (totalScore >= 71.0) {
             return "C";
-        } else if (totalScore >= 55.0) {
+        } else if (totalScore >= 65.0) {
             return "D+";
-        } else if (totalScore >= 50.0) {
+        } else if (totalScore >= 60.0) {
             return "D";
         } else {
             return "F";
@@ -45,24 +45,16 @@ public class GradeCalculator {
         if (letterGrade == null) {
             return 0.00;
         }
-        switch (letterGrade.trim().toUpperCase()) {
-            case "A":
-                return 4.00;
-            case "B+":
-                return 3.50;
-            case "B":
-                return 3.00;
-            case "C+":
-                return 2.50;
-            case "C":
-                return 2.00;
-            case "D+":
-                return 1.50;
-            case "D":
-                return 1.00;
-            default:
-                return 0.00;
-        }
+        return switch (letterGrade.trim().toUpperCase()) {
+            case "A" -> 4.00;
+            case "B+" -> 3.50;
+            case "B" -> 3.00;
+            case "C+" -> 2.50;
+            case "C" -> 2.00;
+            case "D+" -> 1.50;
+            case "D" -> 1.00;
+            default -> 0.00;
+        };
     }
 
     public static double calculateGpaPointFromScore(double totalScore) {
