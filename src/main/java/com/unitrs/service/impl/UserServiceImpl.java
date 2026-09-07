@@ -5,15 +5,16 @@ import com.unitrs.utils.SecurityUtils;
 import com.unitrs.exceptions.UnauthorizedException;
 import com.unitrs.exceptions.UserNotFoundException;
 import com.unitrs.exceptions.ValidationException;
-import com.unitrs.repository.UserDAO;
+import com.unitrs.repository.UserRepository;
 import com.unitrs.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final UserDAO userDAO;
+    private final UserRepository userDAO;
 
     @Override
     public User authenticate(String identifierOrEmail, String password) {
