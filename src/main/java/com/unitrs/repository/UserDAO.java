@@ -18,14 +18,12 @@ public class UserDAO {
 
     private static final Logger LOGGER = Logger.getLogger(UserDAO.class.getName());
 
-    public User authenticate(String identifierOrEmail, String password) {
-        String sql = "SELECT * FROM users WHERE (user_identifier = ? OR email = ?) AND password = ? AND is_active = TRUE";
+    public User findByEmailOrIdentifier(String identifierOrEmail) {
+        String sql = "SELECT * FROM users WHERE (user_identifier = ? OR email = ?) AND is_active = TRUE";
         try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, identifierOrEmail);
             stmt.setString(2, identifierOrEmail);
-            stmt.setString(3, password);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     return mapResultSetToUser(rs);

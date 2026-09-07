@@ -1,5 +1,10 @@
 package com.unitrs.model.entity;
 
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+@Getter
+@AllArgsConstructor
 public enum SessionShift {
     MORNING("Morning", "08:00 AM - 11:15 AM"),
     AFTERNOON("Afternoon", "02:00 PM - 05:15 PM"),
@@ -8,19 +13,6 @@ public enum SessionShift {
 
     private final String displayName;
     private final String timeRange;
-
-    SessionShift(String displayName, String timeRange) {
-        this.displayName = displayName;
-        this.timeRange = timeRange;
-    }
-
-    public String getDisplayName() {
-        return displayName;
-    }
-
-    public String getTimeRange() {
-        return timeRange;
-    }
 
     public static SessionShift fromString(String shiftStr) {
         if (shiftStr == null) {

@@ -58,11 +58,44 @@
             <version>5.10.2</version>
             <scope>test</scope>
         </dependency>
+    
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.38</version>
+            <scope>provided</scope>
+        </dependency>
+
+    
+        <!-- BCrypt for password hashing -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>0.4</version>
+        </dependency>
+
     </dependencies>
 
     <build>
         <finalName>ums</finalName>
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.38</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+
             <!-- Maven WAR Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
