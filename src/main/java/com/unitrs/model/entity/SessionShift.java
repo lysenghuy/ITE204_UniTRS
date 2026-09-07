@@ -1,0 +1,27 @@
+package com.unitrs.model.entity;
+
+import lombok.Getter;
+import lombok.AllArgsConstructor;
+
+@Getter
+@AllArgsConstructor
+public enum SessionShift {
+    MORNING("Morning", "08:00 AM - 11:15 AM"),
+    AFTERNOON("Afternoon", "02:00 PM - 05:15 PM"),
+    EVENING("Evening", "05:45 PM - 08:45 PM"),
+    WEEKEND("Weekend", "Sat - Sun (08:00 AM - 04:30 PM)");
+
+    private final String displayName;
+    private final String timeRange;
+
+    public static SessionShift fromString(String shiftStr) {
+        if (shiftStr == null) {
+            return null;
+        }
+        try {
+            return SessionShift.valueOf(shiftStr.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
+    }
+}
