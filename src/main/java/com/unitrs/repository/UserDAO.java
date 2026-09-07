@@ -1,8 +1,8 @@
-package com.unitrs.model.service;
+package com.unitrs.repository;
 
 import com.unitrs.model.entity.Role;
 import com.unitrs.model.entity.User;
-import com.unitrs.utils.DBConnection;
+import com.unitrs.utils.DatabaseUtils;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -20,7 +20,7 @@ public class UserDAO {
 
     public User authenticate(String identifierOrEmail, String password) {
         String sql = "SELECT * FROM users WHERE (user_identifier = ? OR email = ?) AND password = ? AND is_active = TRUE";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, identifierOrEmail);
             stmt.setString(2, identifierOrEmail);
@@ -40,7 +40,7 @@ public class UserDAO {
     public boolean register(User user) {
         String sql = "INSERT INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, user.getUserIdentifier());
             stmt.setString(2, user.getPassword());
@@ -68,7 +68,7 @@ public class UserDAO {
 
     public User findById(int id) {
         String sql = "SELECT * FROM users WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -84,7 +84,7 @@ public class UserDAO {
 
     public User findByIdentifier(String identifier) {
         String sql = "SELECT * FROM users WHERE user_identifier = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, identifier);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -100,7 +100,7 @@ public class UserDAO {
 
     public User findByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, email);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -117,7 +117,7 @@ public class UserDAO {
     public List<User> findUnverifiedStudents() {
         List<User> students = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE role = 'STUDENT' AND is_verified = FALSE AND is_active = TRUE ORDER BY created_at DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -131,7 +131,7 @@ public class UserDAO {
 
     public boolean verifyStudent(int id, boolean isVerified) {
         String sql = "UPDATE users SET is_verified = ? WHERE id = ? AND role = 'STUDENT'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBoolean(1, isVerified);
             stmt.setInt(2, id);
@@ -145,7 +145,7 @@ public class UserDAO {
     public List<User> findAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users ORDER BY id ASC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -160,7 +160,7 @@ public class UserDAO {
     public List<User> findProfessors() {
         List<User> professors = new ArrayList<>();
         String sql = "SELECT * FROM users WHERE role = 'PROFESSOR' AND is_active = TRUE ORDER BY full_name ASC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
@@ -174,7 +174,7 @@ public class UserDAO {
 
     public boolean updateUserStatus(int id, boolean isActive) {
         String sql = "UPDATE users SET is_active = ? WHERE id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DatabaseUtils.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setBoolean(1, isActive);
             stmt.setInt(2, id);
