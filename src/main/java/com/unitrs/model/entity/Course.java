@@ -1,4 +1,4 @@
-package com.unitrs.model;
+package com.unitrs.model.entity;
 
 public class Course {
 

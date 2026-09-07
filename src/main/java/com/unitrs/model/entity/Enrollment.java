@@ -1,4 +1,4 @@
-package com.unitrs.model;
+package com.unitrs.model.entity;
 
 import java.sql.Timestamp;
 

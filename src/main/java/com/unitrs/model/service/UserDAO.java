@@ -1,8 +1,8 @@
-package com.unitrs.dao;
+package com.unitrs.model.service;
 
-import com.unitrs.model.Role;
-import com.unitrs.model.User;
-import com.unitrs.util.DBConnection;
+import com.unitrs.model.entity.Role;
+import com.unitrs.model.entity.User;
+import com.unitrs.utils.DBConnection;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

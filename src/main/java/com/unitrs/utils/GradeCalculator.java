@@ -1,9 +1,9 @@
-package com.unitrs.util;
+package com.unitrs.utils;
 
-import com.unitrs.model.Grade;
+import com.unitrs.model.entity.Grade;
 import java.util.List;
 
-public class GradeCalculator {
+public class    GradeCalculator {
 
     public static final double MAX_ATTENDANCE = 15.0;
     public static final double MAX_ASSIGNMENT = 25.0;

@@ -1,4 +1,4 @@
-package com.unitrs.model;
+package com.unitrs.model.entity;
 
 public enum SessionShift {
     MORNING("Morning", "08:00 AM - 11:15 AM"),
