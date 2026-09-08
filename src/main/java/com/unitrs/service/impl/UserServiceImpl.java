@@ -53,13 +53,142 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public boolean isIdentifierAvailable(String identifier) {
+        if (identifier == null || identifier.trim().isEmpty()) return false;
+        return userDAO.findByIdentifier(identifier.trim()) == null;
+    }
+
+    @Override
+    public boolean isEmailAvailable(String email) {
+        if (email == null || email.trim().isEmpty()) return false;
+        return userDAO.findByEmail(email.trim()) == null;
+    }
+
+    @Override
     public List<User> findUnverifiedStudents() {
         return userDAO.findUnverifiedStudents();
     }
 
     @Override
+    public List<User> findUnverifiedUsers() {
+        return userDAO.findUnverifiedUsers();
+    }
+
+    @Override
     public boolean verifyStudent(int id, boolean isVerified) {
         return userDAO.verifyStudent(id, isVerified);
+    }
+
+    @Override
+    public boolean updateRole(int id, String role) {
+        return userDAO.updateRole(id, role);
+    }
+
+    @Override
+    public void processUserVerification(int userId, boolean isApproved, String role) {
+        userDAO.verifyStudent(userId, isApproved);
+        if (isApproved && role != null && !role.trim().isEmpty()) {
+            userDAO.updateRole(userId, role);
+        }
+    }
+
+    @Override
+    public void registerNewUser(String identifier, String fullName, String email, String password, String confirmPassword, String major) {
+        if (identifier == null || identifier.trim().isEmpty() ||
+            fullName == null || fullName.trim().isEmpty() ||
+            email == null || email.trim().isEmpty() ||
+            password == null || password.trim().isEmpty() ||
+            confirmPassword == null || confirmPassword.trim().isEmpty()) {
+            throw new ValidationException("Please fill in all required fields.");
+        }
+
+        // 1. Identifier Validation
+        identifier = identifier.trim();
+        if (!identifier.matches("^[A-Za-z0-9._]{3,30}$")) {
+            throw new ValidationException("Identifier must be 3-30 characters long and contain only letters, numbers, dots, and underscores.");
+        }
+        if (identifier.startsWith(".") || identifier.startsWith("_") || identifier.endsWith(".") || identifier.endsWith("_")) {
+            throw new ValidationException("Identifier cannot start or end with a dot or underscore.");
+        }
+        if (identifier.contains("..") || identifier.contains("__") || identifier.contains("._") || identifier.contains("_.")) {
+            throw new ValidationException("Identifier cannot contain consecutive punctuation.");
+        }
+        if (identifier.matches("^\\d+$")) {
+            throw new ValidationException("Identifier cannot be purely numeric.");
+        }
+        String[] reservedWords = {"admin", "root", "support", "null", "undefined", "system", "moderator", "superuser"};
+        for (String word : reservedWords) {
+            if (identifier.equalsIgnoreCase(word)) {
+                throw new ValidationException("This identifier is reserved and cannot be used.");
+            }
+        }
+
+        // 2. Full Name Validation
+        fullName = fullName.trim().replaceAll("\\s+", " ");
+        if (fullName.startsWith("-") || fullName.startsWith("'") || fullName.endsWith("-") || fullName.endsWith("'")) {
+            throw new ValidationException("Full name cannot start or end with hyphens or apostrophes.");
+        }
+        if (!fullName.matches(".*[a-zA-Z].*")) {
+            throw new ValidationException("Full name must contain at least one letter.");
+        }
+        if (!fullName.contains(" ")) {
+            throw new ValidationException("Please provide both first and last name (separated by space).");
+        }
+
+        // 3. Email Validation
+        email = email.trim().toLowerCase();
+        if (email.length() > 64) {
+            throw new ValidationException("Email address must not exceed 64 characters.");
+        }
+        if (!email.endsWith("@gmail.com") && !email.endsWith(".edu")) {
+            throw new ValidationException("Email must be a @gmail.com or an .edu domain.");
+        }
+
+        // 4. Password Validation
+        if (!password.equals(confirmPassword)) {
+            throw new ValidationException("Passwords do not match.");
+        }
+        if (password.length() < 8 || password.length() > 64) {
+            throw new ValidationException("Password must be between 8 and 64 characters.");
+        }
+        if (password.trim().isEmpty()) {
+            throw new ValidationException("Password cannot be purely whitespace.");
+        }
+        if (!password.matches(".*[A-Z].*")) {
+            throw new ValidationException("Password must contain at least one uppercase letter.");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new ValidationException("Password must contain at least one lowercase letter.");
+        }
+        if (!password.matches(".*[0-9].*")) {
+            throw new ValidationException("Password must contain at least one number.");
+        }
+        if (!password.matches(".*[!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>/?~`].*")) {
+            throw new ValidationException("Password must contain at least one special character.");
+        }
+
+        // 5. Uniqueness Checks
+        if (!isIdentifierAvailable(identifier)) {
+            throw new ValidationException("User with this identifier already exists.");
+        }
+        if (!isEmailAvailable(email)) {
+            throw new ValidationException("User with this email already exists.");
+        }
+
+        User newUser = new User();
+        newUser.setUserIdentifier(identifier);
+        newUser.setFullName(fullName);
+        newUser.setEmail(email);
+        newUser.setPassword(password); 
+        newUser.setMajor(major != null && !major.trim().isEmpty() ? major.trim() : null);
+        newUser.setRole(com.unitrs.model.entity.Role.STUDENT); 
+        newUser.setVerified(false);
+        newUser.setActive(true);
+
+        boolean success = register(newUser);
+        if (!success) {
+            throw new ValidationException("Failed to register user to the database.");
+        }
     }
 
     @Override

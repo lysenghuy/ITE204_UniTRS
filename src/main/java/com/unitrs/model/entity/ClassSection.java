@@ -15,7 +15,6 @@ public class ClassSection {
     private String room;
     private String daysOfWeek;
     private String academicYear;
-
     private String courseCode;
     private String courseTitle;
     private int credits;
