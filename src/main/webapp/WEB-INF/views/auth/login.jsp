@@ -66,10 +66,18 @@
             </div>
         </c:if>
 
-        <!-- Success message (e.g., after logout) -->
+        <!-- Success message (e.g., after registration) -->
         <c:if test="${not empty success}">
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <i class="bi bi-check-circle-fill me-2"></i>${success}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </c:if>
+
+        <!-- Logout message -->
+        <c:if test="${param.logout == 'true'}">
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <i class="bi bi-box-arrow-right me-2"></i>You have been logged out successfully.
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         </c:if>
@@ -115,9 +123,9 @@
                 localStorage.removeItem('reg_majorInput');
             }
 
-            // Restore login identifier
+            // Restore login identifier only if input is currently empty
             const identifierInput = document.getElementById('identifier');
-            if (localStorage.getItem('login_identifier')) {
+            if (!identifierInput.value && localStorage.getItem('login_identifier')) {
                 identifierInput.value = localStorage.getItem('login_identifier');
             }
 

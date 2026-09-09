@@ -76,7 +76,8 @@ public class AuthController extends HttpServlet {
 
             // Check if user is verified
             if (!user.isVerified()) {
-                request.setAttribute("error", "the account have not yet been verified yet wiat the gmail will sent to your gmail when your account have been verifed");
+                request.setAttribute("error", "Your account has not been verified yet. An administrator must verify your account before you can log in.");
+                request.setAttribute("identifier", identifierOrEmail);
                 request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
                 return;
             }
@@ -148,6 +149,6 @@ public class AuthController extends HttpServlet {
         if (session != null) {
             session.invalidate();
         }
-        response.sendRedirect(request.getContextPath() + "/auth/login");
+        response.sendRedirect(request.getContextPath() + "/auth/login?logout=true");
     }
 }

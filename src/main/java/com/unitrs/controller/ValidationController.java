@@ -20,7 +20,7 @@ public class ValidationController extends HttpServlet {
     
     // Simple memory-based rate limiter: IP -> [timestamp, count]
     private final Map<String, long[]> rateLimiter = new ConcurrentHashMap<>();
-    private static final int MAX_REQUESTS = 20;
+    private static final int MAX_REQUESTS = 60;
     private static final long TIME_WINDOW_MS = 60000; // 1 minute
 
     @Override

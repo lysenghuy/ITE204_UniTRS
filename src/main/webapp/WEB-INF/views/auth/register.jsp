@@ -125,10 +125,10 @@
                 <div class="input-group">
                     <span class="input-group-text"><i class="bi bi-hash"></i></span>
                     <input type="text" class="form-control" id="identifier" name="identifier"
-                           placeholder="e.g. s10293 or john.doe" required autocomplete="off" value="${identifier}">
+                           placeholder="e.g. 60-24-04-91 or john.doe" required autocomplete="off" value="${identifier}">
                 </div>
                 <div id="identifierValidation" class="validation-message text-muted">
-                    Must be 3-30 characters long (letters, numbers, dots, underscores).
+                    Must be 3-30 characters long (letters, numbers, dots, hyphens, underscores).
                 </div>
             </div>
             
@@ -248,7 +248,10 @@
 
         // State
         let isIdentifierValid = false;
+        let isEmailValid = false;
+        let isFullNameValid = false;
         let identifierTimer;
+        let emailTimer;
         
         // Handle server-side major restoration
         const serverMajor = '${major}';
@@ -264,8 +267,14 @@
             }
         }
 
+        // --- Helper ---
+        function setValidationMsg(el, msg, colorClass, iconClass) {
+            el.className = 'validation-message ' + colorClass;
+            el.innerHTML = iconClass ? `<i class="bi ${iconClass}"></i> ${msg}` : msg;
+        }
+
         // --- Identifier Validation ---
-        identifierInput.addEventListener('input', () => {
+        function validateIdentifier() {
             clearTimeout(identifierTimer);
             const val = identifierInput.value.trim();
             isIdentifierValid = false;
@@ -275,16 +284,16 @@
                 return;
             }
             
-            // Client-side format checks
-            if (!/^[A-Za-z0-9._]{3,30}$/.test(val)) {
-                setValidationMsg(identifierVal, '3-30 chars. Only letters, numbers, dots, underscores.', 'text-danger-custom', 'bi-x-circle');
+            // Format checks (allow letters, numbers, dots, hyphens, underscores)
+            if (!/^[A-Za-z0-9._-]{3,30}$/.test(val)) {
+                setValidationMsg(identifierVal, '3-30 chars. Only letters, numbers, dots, hyphens, underscores.', 'text-danger-custom', 'bi-x-circle');
                 return;
             }
-            if (/^[._]|[._]$/.test(val)) {
-                setValidationMsg(identifierVal, 'Cannot start or end with . or _', 'text-danger-custom', 'bi-x-circle');
+            if (/^[._-]|[._-]$/.test(val)) {
+                setValidationMsg(identifierVal, 'Cannot start or end with ., -, or _', 'text-danger-custom', 'bi-x-circle');
                 return;
             }
-            if (/\.\.|\_\_|\.\_|\_\./.test(val)) {
+            if (/\.\.|\_\_|\-\-|\.\_|\_\.|\.\-|\-\.|\_\-|\-\_/.test(val)) {
                 setValidationMsg(identifierVal, 'Cannot contain consecutive punctuation', 'text-danger-custom', 'bi-x-circle');
                 return;
             }
@@ -305,7 +314,7 @@
                 try {
                     const res = await fetch(contextPath + '/api/validate/identifier?identifier=' + encodeURIComponent(val));
                     if (res.status === 429) {
-                        setValidationMsg(identifierVal, 'Rate limit exceeded, please wait', 'text-danger-custom', 'bi-x-circle');
+                        setValidationMsg(identifierVal, 'Rate limit reached, please wait a moment', 'text-warning-custom', 'bi-hourglass-split');
                         return;
                     }
                     const data = await res.json();
@@ -313,37 +322,46 @@
                         isIdentifierValid = true;
                         setValidationMsg(identifierVal, 'Identifier is available!', 'text-success-custom', 'bi-check-circle');
                     } else {
+                        isIdentifierValid = false;
                         setValidationMsg(identifierVal, 'Identifier is taken', 'text-danger-custom', 'bi-x-circle');
                     }
                 } catch (e) {
                     setValidationMsg(identifierVal, 'Error checking availability', 'text-danger-custom', 'bi-exclamation-circle');
                 }
-            }, 500);
-        });
+            }, 400);
+        }
+
+        identifierInput.addEventListener('input', validateIdentifier);
 
         // --- Full Name Validation ---
-        fullNameInput.addEventListener('blur', () => {
+        function validateFullName() {
             let val = fullNameInput.value.replace(/\s+/g, ' ').trim();
             fullNameInput.value = val;
+            isFullNameValid = false;
             
             if (!val) {
                 setValidationMsg(fullNameVal, 'Required', 'text-danger-custom', 'bi-x-circle');
+            } else if (val.length < 2 || val.length > 100) {
+                setValidationMsg(fullNameVal, 'Full name must be between 2 and 100 characters', 'text-danger-custom', 'bi-x-circle');
             } else if (/^[-']|[-']$/.test(val)) {
                 setValidationMsg(fullNameVal, 'Cannot start/end with hyphens or apostrophes', 'text-danger-custom', 'bi-x-circle');
-            } else if (!/[a-zA-Z]/.test(val)) {
-                setValidationMsg(fullNameVal, 'Must contain letters', 'text-danger-custom', 'bi-x-circle');
+            } else if (!/^[a-zA-Z\s'-]+$/.test(val)) {
+                setValidationMsg(fullNameVal, 'Full name can only contain letters, spaces, hyphens, and apostrophes', 'text-danger-custom', 'bi-x-circle');
             } else if (!val.includes(' ')) {
-                setValidationMsg(fullNameVal, 'Please provide both first and last name', 'text-danger-custom', 'bi-x-circle');
+                setValidationMsg(fullNameVal, 'Please provide both first and last name (separated by space)', 'text-danger-custom', 'bi-x-circle');
             } else {
+                isFullNameValid = true;
                 setValidationMsg(fullNameVal, 'Looks good!', 'text-success-custom', 'bi-check-circle');
             }
-        });
+        }
+
+        fullNameInput.addEventListener('blur', validateFullName);
 
         // --- Email Validation ---
-        let emailTimer;
-        emailInput.addEventListener('input', () => {
+        function validateEmail() {
             clearTimeout(emailTimer);
             const val = emailInput.value.trim().toLowerCase();
+            isEmailValid = false;
             
             if (!val) {
                 setValidationMsg(emailVal, 'Make sure the email can receive messages because you need to verify it.', 'text-muted', '');
@@ -352,6 +370,11 @@
             
             if (val.length > 64) {
                 setValidationMsg(emailVal, 'Max 64 characters allowed', 'text-danger-custom', 'bi-x-circle');
+                return;
+            }
+
+            if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(val)) {
+                setValidationMsg(emailVal, 'Please enter a valid email address format', 'text-danger-custom', 'bi-x-circle');
                 return;
             }
             
@@ -364,17 +387,25 @@
             emailTimer = setTimeout(async () => {
                 try {
                     const res = await fetch(contextPath + '/api/validate/email?email=' + encodeURIComponent(val));
+                    if (res.status === 429) {
+                        setValidationMsg(emailVal, 'Rate limit reached, please wait a moment', 'text-warning-custom', 'bi-hourglass-split');
+                        return;
+                    }
                     const data = await res.json();
                     if (data.available) {
+                        isEmailValid = true;
                         setValidationMsg(emailVal, 'Email is available!', 'text-success-custom', 'bi-check-circle');
                     } else {
+                        isEmailValid = false;
                         setValidationMsg(emailVal, 'Email is already registered', 'text-danger-custom', 'bi-x-circle');
                     }
                 } catch (e) {
                     setValidationMsg(emailVal, 'Error checking availability', 'text-danger-custom', 'bi-exclamation-circle');
                 }
-            }, 500);
-        });
+            }, 400);
+        }
+
+        emailInput.addEventListener('input', validateEmail);
 
         // --- Major Handling ---
         majorSelect.addEventListener('change', () => {
@@ -389,16 +420,25 @@
         });
 
         // --- Password Strength ---
-        passwordInput.addEventListener('input', () => {
-            const val = passwordInput.value;
-            
-            const checks = {
+        function checkPasswordRules(val) {
+            return {
                 len: val.length >= 8 && val.length <= 64,
                 upper: /[A-Z]/.test(val),
                 lower: /[a-z]/.test(val),
                 num: /[0-9]/.test(val),
                 spec: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>/?~`]/.test(val)
             };
+        }
+
+        function isPasswordValid(val) {
+            if (!val || val.trim() === '') return false;
+            const r = checkPasswordRules(val);
+            return r.len && r.upper && r.lower && r.num && r.spec;
+        }
+
+        passwordInput.addEventListener('input', () => {
+            const val = passwordInput.value;
+            const checks = checkPasswordRules(val);
 
             let score = 0;
             for (let key in checks) {
@@ -416,7 +456,6 @@
                 }
             }
             
-            // Cannot be purely whitespace
             if (val.trim() === '') score = 0;
 
             const segments = ['seg1', 'seg2', 'seg3', 'seg4'];
@@ -431,7 +470,7 @@
                 }
             });
             
-            validateConfirm(); // Re-validate confirm if password changes
+            validateConfirm();
         });
 
         // --- Confirm Password ---
@@ -449,49 +488,93 @@
             }
         }
 
-        // --- Helper ---
-        function setValidationMsg(el, msg, colorClass, iconClass) {
-            el.className = 'validation-message ' + colorClass;
-            el.innerHTML = iconClass ? `<i class="bi ${iconClass}"></i> ${msg}` : msg;
-        }
-
         // Form Submit Check
         registerForm.addEventListener('submit', (e) => {
+            validateFullName();
+
             if (!isIdentifierValid) {
                 e.preventDefault();
-                alert("We are still checking if your username/identifier is valid and available. Please make sure it shows a green checkmark before clicking Register.");
+                alert("Please provide a valid and available identifier/username before registering.");
                 identifierInput.focus();
                 return;
             }
-            // Before submit, map the major value so AuthController can just read 'major'
-            const finalMajor = document.createElement('input');
-            finalMajor.type = 'hidden';
-            finalMajor.name = 'major';
+
+            if (!isFullNameValid) {
+                e.preventDefault();
+                alert("Please provide a valid first and last name.");
+                fullNameInput.focus();
+                return;
+            }
+
+            if (!isEmailValid) {
+                e.preventDefault();
+                alert("Please provide a valid, available @gmail.com or .edu email address.");
+                emailInput.focus();
+                return;
+            }
+
+            if (!isPasswordValid(passwordInput.value)) {
+                e.preventDefault();
+                alert("Please satisfy all password complexity requirements (8-64 characters, uppercase, lowercase, number, and special character).");
+                passwordInput.focus();
+                return;
+            }
+
+            if (passwordInput.value !== confirmInput.value) {
+                e.preventDefault();
+                alert("Passwords do not match.");
+                confirmInput.focus();
+                return;
+            }
+
+            if (majorSelect.value === 'Other' && !majorInput.value.trim()) {
+                e.preventDefault();
+                alert("Please specify your major.");
+                majorInput.focus();
+                return;
+            }
+
+            // Map major safely without creating duplicate hidden inputs
+            let finalMajor = document.getElementById('finalMajorInput');
+            if (!finalMajor) {
+                finalMajor = document.createElement('input');
+                finalMajor.type = 'hidden';
+                finalMajor.name = 'major';
+                finalMajor.id = 'finalMajorInput';
+                registerForm.appendChild(finalMajor);
+            }
             finalMajor.value = majorSelect.value === 'Other' ? majorInput.value.trim() : majorSelect.value;
-            registerForm.appendChild(finalMajor);
         });
 
-        // --- Local Storage Management ---
+        // --- Local Storage & Autofill Management ---
         window.addEventListener('DOMContentLoaded', () => {
-            // Restore values
-            if (localStorage.getItem('reg_identifier')) {
+            // Restore from localStorage if input is empty
+            if (!identifierInput.value && localStorage.getItem('reg_identifier')) {
                 identifierInput.value = localStorage.getItem('reg_identifier');
-                identifierInput.dispatchEvent(new Event('input')); // trigger validation
             }
-            if (localStorage.getItem('reg_fullName')) {
+            if (!fullNameInput.value && localStorage.getItem('reg_fullName')) {
                 fullNameInput.value = localStorage.getItem('reg_fullName');
-                fullNameInput.dispatchEvent(new Event('blur')); // trigger validation
             }
-            if (localStorage.getItem('reg_email')) {
+            if (!emailInput.value && localStorage.getItem('reg_email')) {
                 emailInput.value = localStorage.getItem('reg_email');
-                emailInput.dispatchEvent(new Event('input')); // trigger validation
             }
-            if (localStorage.getItem('reg_majorSelect')) {
+            if (!majorSelect.value && localStorage.getItem('reg_majorSelect')) {
                 majorSelect.value = localStorage.getItem('reg_majorSelect');
-                majorSelect.dispatchEvent(new Event('change')); // show/hide 'Other' input
+                majorSelect.dispatchEvent(new Event('change'));
             }
-            if (localStorage.getItem('reg_majorInput')) {
+            if (!majorInput.value && localStorage.getItem('reg_majorInput')) {
                 majorInput.value = localStorage.getItem('reg_majorInput');
+            }
+
+            // Trigger validations for pre-filled / restored fields
+            if (identifierInput.value.trim() !== '') {
+                validateIdentifier();
+            }
+            if (fullNameInput.value.trim() !== '') {
+                validateFullName();
+            }
+            if (emailInput.value.trim() !== '') {
+                validateEmail();
             }
         });
 

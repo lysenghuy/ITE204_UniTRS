@@ -34,21 +34,23 @@ public class AuthenticationFilter implements Filter {
         // if they try to access the landing page or auth pages.
         if (isLoggedIn && (path.equals("/") || path.equals("/index.jsp") || path.equals("/auth/login") || path.equals("/auth/register"))) {
             Role userRole = (Role) session.getAttribute("role");
-            switch (userRole) {
-                case ADMIN:
-                    httpResponse.sendRedirect(contextPath + "/admin/dashboard");
-                    return;
-                case DEAN:
-                    httpResponse.sendRedirect(contextPath + "/dean/dashboard");
-                    return;
-                case PROFESSOR:
-                    httpResponse.sendRedirect(contextPath + "/professor/dashboard");
-                    return;
-                case STUDENT:
-                    httpResponse.sendRedirect(contextPath + "/student/dashboard");
-                    return;
-                default:
-                    break;
+            if (userRole != null) {
+                switch (userRole) {
+                    case ADMIN:
+                        httpResponse.sendRedirect(contextPath + "/admin/dashboard");
+                        return;
+                    case DEAN:
+                        httpResponse.sendRedirect(contextPath + "/dean/dashboard");
+                        return;
+                    case PROFESSOR:
+                        httpResponse.sendRedirect(contextPath + "/professor/dashboard");
+                        return;
+                    case STUDENT:
+                        httpResponse.sendRedirect(contextPath + "/student/dashboard");
+                        return;
+                    default:
+                        break;
+                }
             }
         }
 
