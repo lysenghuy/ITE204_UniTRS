@@ -94,7 +94,8 @@ INSERT IGNORE INTO courses (course_code, course_title, credits) VALUES
 ('ENG 201', 'Advanced Academic English', 3);
 
 -- Seed Initial Staff Roles (Verified staff accounts)
+-- Passwords are BCrypt-hashed: admin123, dean123, prof123
 INSERT IGNORE INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active) VALUES
-('admin', 'admin123', 'System Administrator', 'admin@unitrs.edu', 'ADMIN', 'IT Infrastructure', TRUE, TRUE),
-('dean@unitrs.edu', 'dean123', 'Dean of Academic Affairs', 'dean@unitrs.edu', 'DEAN', 'Computer Science', TRUE, TRUE),
-('prof.sok@unitrs.edu', 'prof123', 'Prof. Sok Chan', 'prof.sok@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE);
+('admin', '$2a$12$yDvhSPnM7Ne8VReersrfNunoFcOlm1qt78L0/9bQlc6zusej5PBNO', 'System Administrator', 'admin@unitrs.edu', 'ADMIN', 'IT Infrastructure', TRUE, TRUE),
+('dean@unitrs.edu', '$2a$12$xvvaVuiH2ZXkzauGFnMM8OG57jEXbSRy4tSIqFHmJYMXQToZJhl.a', 'Dean of Academic Affairs', 'dean@unitrs.edu', 'DEAN', 'Computer Science', TRUE, TRUE),
+('prof.sok@unitrs.edu', '$2a$12$3PcEw7rrb4hzSvmmVeYsy.zgG9XBMTuQFd5wf.bYSPeaZ0FUGNd0G', 'Prof. Sok Chan', 'prof.sok@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE);

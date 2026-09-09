@@ -9,8 +9,14 @@ public interface UserService {
     User findById(int id);
     User findByIdentifier(String identifier);
     User findByEmail(String email);
+    boolean isIdentifierAvailable(String identifier);
+    boolean isEmailAvailable(String email);
     List<User> findUnverifiedStudents();
+    List<User> findUnverifiedUsers();
     boolean verifyStudent(int id, boolean isVerified);
+    void processUserVerification(int userId, boolean isApproved, String role);
+    boolean updateRole(int id, String role);
+    void registerNewUser(String identifier, String fullName, String email, String password, String confirmPassword, String major);
     List<User> findAllUsers();
     List<User> findProfessors();
     boolean updateUserStatus(int id, boolean isActive);
