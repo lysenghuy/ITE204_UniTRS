@@ -104,13 +104,16 @@ public class UserServiceImpl implements UserService {
 
         // 1. Identifier Validation
         identifier = identifier.trim();
-        if (!identifier.matches("^[A-Za-z0-9._]{3,30}$")) {
-            throw new ValidationException("Identifier must be 3-30 characters long and contain only letters, numbers, dots, and underscores.");
+        if (!identifier.matches("^[A-Za-z0-9._-]{3,30}$")) {
+            throw new ValidationException("Identifier must be 3-30 characters long and contain only letters, numbers, dots, hyphens, and underscores.");
         }
-        if (identifier.startsWith(".") || identifier.startsWith("_") || identifier.endsWith(".") || identifier.endsWith("_")) {
-            throw new ValidationException("Identifier cannot start or end with a dot or underscore.");
+        if (identifier.startsWith(".") || identifier.startsWith("_") || identifier.startsWith("-")
+                || identifier.endsWith(".") || identifier.endsWith("_") || identifier.endsWith("-")) {
+            throw new ValidationException("Identifier cannot start or end with a dot, hyphen, or underscore.");
         }
-        if (identifier.contains("..") || identifier.contains("__") || identifier.contains("._") || identifier.contains("_.")) {
+        if (identifier.contains("..") || identifier.contains("__") || identifier.contains("--")
+                || identifier.contains("._") || identifier.contains("_.") || identifier.contains(".-")
+                || identifier.contains("-.") || identifier.contains("_-") || identifier.contains("-_")) {
             throw new ValidationException("Identifier cannot contain consecutive punctuation.");
         }
         if (identifier.matches("^\\d+$")) {
@@ -125,11 +128,14 @@ public class UserServiceImpl implements UserService {
 
         // 2. Full Name Validation
         fullName = fullName.trim().replaceAll("\\s+", " ");
+        if (fullName.length() < 2 || fullName.length() > 100) {
+            throw new ValidationException("Full name must be between 2 and 100 characters.");
+        }
         if (fullName.startsWith("-") || fullName.startsWith("'") || fullName.endsWith("-") || fullName.endsWith("'")) {
             throw new ValidationException("Full name cannot start or end with hyphens or apostrophes.");
         }
-        if (!fullName.matches(".*[a-zA-Z].*")) {
-            throw new ValidationException("Full name must contain at least one letter.");
+        if (!fullName.matches("^[a-zA-Z\\s'-]+$")) {
+            throw new ValidationException("Full name can only contain letters, spaces, hyphens, and apostrophes.");
         }
         if (!fullName.contains(" ")) {
             throw new ValidationException("Please provide both first and last name (separated by space).");
@@ -139,6 +145,9 @@ public class UserServiceImpl implements UserService {
         email = email.trim().toLowerCase();
         if (email.length() > 64) {
             throw new ValidationException("Email address must not exceed 64 characters.");
+        }
+        if (!email.matches("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            throw new ValidationException("Please provide a valid email format.");
         }
         if (!email.endsWith("@gmail.com") && !email.endsWith(".edu")) {
             throw new ValidationException("Email must be a @gmail.com or an .edu domain.");
@@ -167,7 +176,15 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Password must contain at least one special character.");
         }
 
-        // 5. Uniqueness Checks
+        // 5. Major Validation (if provided)
+        if (major != null) {
+            major = major.trim();
+            if (major.length() > 100) {
+                throw new ValidationException("Major must not exceed 100 characters.");
+            }
+        }
+
+        // 6. Uniqueness Checks
         if (!isIdentifierAvailable(identifier)) {
             throw new ValidationException("User with this identifier already exists.");
         }
@@ -180,7 +197,7 @@ public class UserServiceImpl implements UserService {
         newUser.setFullName(fullName);
         newUser.setEmail(email);
         newUser.setPassword(password); 
-        newUser.setMajor(major != null && !major.trim().isEmpty() ? major.trim() : null);
+        newUser.setMajor(major != null && !major.isEmpty() ? major : null);
         newUser.setRole(com.unitrs.model.entity.Role.STUDENT); 
         newUser.setVerified(false);
         newUser.setActive(true);
