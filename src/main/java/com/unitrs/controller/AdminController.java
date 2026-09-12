@@ -89,7 +89,7 @@ public class AdminController extends HttpServlet {
             throws IOException {
 
         int userId = Integer.parseInt(request.getParameter("userId"));
-        String action = request.getParameter("action"); // "approve" or "reject"
+        String action = request.getParameter("action");
         String role = request.getParameter("role");
 
         boolean isApproved = "approve".equals(action);
@@ -102,7 +102,7 @@ public class AdminController extends HttpServlet {
             throws IOException {
 
         int userId = Integer.parseInt(request.getParameter("userId"));
-        String action = request.getParameter("action"); // "activate" or "deactivate"
+        String action = request.getParameter("action");
 
         boolean isActive = "activate".equals(action);
         userService.updateUserStatus(userId, isActive);
