@@ -15,7 +15,7 @@ public class UserRepository extends BaseRepository {
     }
 
     public boolean register(User user) {
-        String sql = "INSERT INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active, dean_school_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         int id = executeInsertAndReturnKey(sql, 
                 user.getUserIdentifier(), 
                 user.getPassword(), 
@@ -24,7 +24,8 @@ public class UserRepository extends BaseRepository {
                 user.getRole() != null ? user.getRole().name() : Role.STUDENT.name(), 
                 user.getMajor(), 
                 user.isVerified(), 
-                user.isActive());
+                user.isActive(),
+                user.getDeanSchoolId());
         
         if (id > 0) {
             user.setId(id);
@@ -53,6 +54,13 @@ public class UserRepository extends BaseRepository {
             user.setMajor(rs.getString("major"));
             user.setVerified(rs.getBoolean("is_verified"));
             user.setActive(rs.getBoolean("is_active"));
+            
+            int deanSchoolId = rs.getInt("dean_school_id");
+            user.setDeanSchoolId(rs.wasNull() ? null : deanSchoolId);
+            
+            int studentSchoolId = rs.getInt("student_school_id");
+            user.setStudentSchoolId(rs.wasNull() ? null : studentSchoolId);
+            
             user.setCreatedAt(rs.getTimestamp("created_at"));
             return user;
         }, identifier);
@@ -109,6 +117,16 @@ public class UserRepository extends BaseRepository {
         return executeUpdate(sql, hashedPassword, id) > 0;
     }
 
+    public boolean assignDeanToSchool(int userId, Integer schoolId) {
+        String sql = "UPDATE users SET dean_school_id = ? WHERE id = ?";
+        return executeUpdate(sql, schoolId, userId) > 0;
+    }
+
+    public List<User> findStudentsBySchool(int schoolId) {
+        String sql = "SELECT * FROM users WHERE role = 'STUDENT' AND student_school_id = ? ORDER BY full_name ASC";
+        return executeQuery(sql, this::mapResultSetToUser, schoolId);
+    }
+
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
@@ -120,6 +138,13 @@ public class UserRepository extends BaseRepository {
         user.setMajor(rs.getString("major"));
         user.setVerified(rs.getBoolean("is_verified"));
         user.setActive(rs.getBoolean("is_active"));
+        
+        int deanSchoolId = rs.getInt("dean_school_id");
+        user.setDeanSchoolId(rs.wasNull() ? null : deanSchoolId);
+        
+        int studentSchoolId = rs.getInt("student_school_id");
+        user.setStudentSchoolId(rs.wasNull() ? null : studentSchoolId);
+        
         user.setCreatedAt(rs.getTimestamp("created_at"));
         return user;
     }

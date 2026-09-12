@@ -17,11 +17,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ValidationController extends HttpServlet {
 
     private UserService userService;
-    
-    // Simple memory-based rate limiter: IP -> [timestamp, count]
     private final Map<String, long[]> rateLimiter = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS = 60;
-    private static final long TIME_WINDOW_MS = 60000; // 1 minute
+    private static final long TIME_WINDOW_MS = 60000;
 
     @Override
     public void init() throws ServletException {
@@ -43,7 +41,7 @@ public class ValidationController extends HttpServlet {
         }
 
         String path = request.getPathInfo();
-        
+
         if ("/identifier".equals(path)) {
             String identifier = request.getParameter("identifier");
             if (identifier == null || identifier.trim().isEmpty()) {
@@ -52,7 +50,7 @@ public class ValidationController extends HttpServlet {
             }
             boolean available = userService.isIdentifierAvailable(identifier.trim());
             response.getWriter().write("{\"available\": " + available + "}");
-            
+
         } else if ("/email".equals(path)) {
             String email = request.getParameter("email");
             if (email == null || email.trim().isEmpty()) {
@@ -61,7 +59,7 @@ public class ValidationController extends HttpServlet {
             }
             boolean available = userService.isEmailAvailable(email.trim());
             response.getWriter().write("{\"available\": " + available + "}");
-            
+
         } else {
             response.setStatus(404);
             response.getWriter().write("{\"error\": \"Not found\"}");
@@ -70,8 +68,8 @@ public class ValidationController extends HttpServlet {
 
     private boolean isRateLimited(String ip) {
         long currentTime = System.currentTimeMillis();
-        long[] data = rateLimiter.computeIfAbsent(ip, k -> new long[]{currentTime, 0});
-        
+        long[] data = rateLimiter.computeIfAbsent(ip, k -> new long[] { currentTime, 0 });
+
         synchronized (data) {
             if (currentTime - data[0] > TIME_WINDOW_MS) {
                 // Reset window

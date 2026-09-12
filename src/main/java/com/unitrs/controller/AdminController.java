@@ -33,6 +33,8 @@ public class AdminController extends HttpServlet {
             showDashboard(request, response);
         } else if ("/users".equals(path)) {
             showUsers(request, response);
+        } else if ("/deans".equals(path)) {
+            showDeans(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         }
@@ -48,6 +50,8 @@ public class AdminController extends HttpServlet {
             handleVerifyStudent(request, response);
         } else if ("/users/status".equals(path)) {
             handleUpdateStatus(request, response);
+        } else if ("/deans/assign".equals(path)) {
+            handleAssignDean(request, response);
         } else {
             response.sendRedirect(request.getContextPath() + "/admin/dashboard");
         }
@@ -85,11 +89,66 @@ public class AdminController extends HttpServlet {
         request.getRequestDispatcher("/WEB-INF/views/admin/users.jsp").forward(request, response);
     }
 
+    private void showDeans(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        
+        com.unitrs.service.DeanService deanService = new com.unitrs.service.impl.DeanServiceImpl(
+                new com.unitrs.repository.CourseRepository(),
+                new com.unitrs.repository.TermRepository(),
+                new com.unitrs.repository.UserRepository(),
+                new com.unitrs.repository.ClassSectionRepository(),
+                new com.unitrs.repository.RoomRepository(),
+                new com.unitrs.repository.SchoolRepository()
+        );
+
+        List<com.unitrs.model.entity.School> schools = deanService.getAllSchools();
+        List<User> professors = userService.findProfessors();
+        
+        // Find which professor is the dean for each school
+        java.util.Map<Integer, User> currentDeans = new java.util.HashMap<>();
+        for (User prof : professors) {
+            if (prof.getDeanSchoolId() != null) {
+                currentDeans.put(prof.getDeanSchoolId(), prof);
+            }
+        }
+
+        request.setAttribute("schools", schools);
+        request.setAttribute("professors", professors);
+        request.setAttribute("currentDeans", currentDeans);
+
+        request.getRequestDispatcher("/WEB-INF/views/admin/deans.jsp").forward(request, response);
+    }
+
+    private void handleAssignDean(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+        
+        int schoolId = Integer.parseInt(request.getParameter("schoolId"));
+        String professorIdStr = request.getParameter("professorId");
+        
+        UserRepository userRepo = new UserRepository();
+        
+        // If there was an existing dean for this school, we need to unassign them first
+        List<User> professors = userService.findProfessors();
+        for (User prof : professors) {
+            if (prof.getDeanSchoolId() != null && prof.getDeanSchoolId() == schoolId) {
+                userRepo.assignDeanToSchool(prof.getId(), null);
+            }
+        }
+        
+        // Assign the new dean, if one was selected
+        if (professorIdStr != null && !professorIdStr.isEmpty()) {
+            int professorId = Integer.parseInt(professorIdStr);
+            userRepo.assignDeanToSchool(professorId, schoolId);
+        }
+        
+        response.sendRedirect(request.getContextPath() + "/admin/deans");
+    }
+
     private void handleVerifyStudent(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
 
         int userId = Integer.parseInt(request.getParameter("userId"));
-        String action = request.getParameter("action"); // "approve" or "reject"
+        String action = request.getParameter("action");
         String role = request.getParameter("role");
 
         boolean isApproved = "approve".equals(action);
@@ -102,7 +161,7 @@ public class AdminController extends HttpServlet {
             throws IOException {
 
         int userId = Integer.parseInt(request.getParameter("userId"));
-        String action = request.getParameter("action"); // "activate" or "deactivate"
+        String action = request.getParameter("action");
 
         boolean isActive = "activate".equals(action);
         userService.updateUserStatus(userId, isActive);

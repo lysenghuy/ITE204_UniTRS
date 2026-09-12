@@ -1,7 +1,13 @@
 CREATE DATABASE IF NOT EXISTS unitrs_db;
 USE unitrs_db;
 
--- 1. Users Table (Handles Students, Faculty, Deans, and Admins)
+-- 1. Academic Schools (Colleges)
+CREATE TABLE IF NOT EXISTS schools (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    school_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- 2. Users Table (Handles Students, Faculty, Deans, and Admins)
 CREATE TABLE IF NOT EXISTS users (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_identifier VARCHAR(50) NOT NULL UNIQUE, -- Student ID (e.g. '60-24-04-91') or Staff Username/Email
@@ -12,22 +18,29 @@ CREATE TABLE IF NOT EXISTS users (
     major VARCHAR(100),
     is_verified BOOLEAN DEFAULT FALSE,           -- Requires Admin verification for Students
     is_active BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    dean_school_id INT UNIQUE DEFAULT NULL,      -- A user can be the Dean of at most one school
+    student_school_id INT DEFAULT NULL,          -- The school a student officially belongs to
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (dean_school_id) REFERENCES schools(id) ON DELETE SET NULL,
+    FOREIGN KEY (student_school_id) REFERENCES schools(id) ON DELETE SET NULL
 );
 
--- 2. Terms Master Table
+-- 3. Terms Master Table
 CREATE TABLE IF NOT EXISTS terms (
     id INT AUTO_INCREMENT PRIMARY KEY,
     term_number INT NOT NULL UNIQUE,             -- e.g. 1 through 12
     term_name VARCHAR(50) NOT NULL               -- e.g. 'Term 5'
 );
 
--- 3. Courses Master Table
+-- 4. Courses Master Table
 CREATE TABLE IF NOT EXISTS courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     course_code VARCHAR(20) NOT NULL UNIQUE,     -- e.g. 'ITE 204'
     course_title VARCHAR(150) NOT NULL,          -- e.g. 'Java Enterprise Edition'
-    credits INT DEFAULT 3
+    credits INT DEFAULT 3,
+    school_id INT NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE RESTRICT,
+    INDEX idx_courses_school_id (school_id)
 );
 
 -- 4. Term Course Bundles (Mapping courses belonging to a specific term)
@@ -40,20 +53,34 @@ CREATE TABLE IF NOT EXISTS term_courses (
     UNIQUE KEY uq_term_course (term_id, course_id)
 );
 
--- 5. Class Sections (Actual scheduled classes per term, shift, and professor)
+-- 5. Rooms (Physical space capacity)
+CREATE TABLE IF NOT EXISTS rooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(20) NOT NULL UNIQUE,
+    floor_number INT NOT NULL,
+    capacity INT NOT NULL
+);
+
+-- 6. Class Sections (Actual scheduled classes per term, shift, and professor)
 CREATE TABLE IF NOT EXISTS class_sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     term_id INT NOT NULL,
     course_id INT NOT NULL,
     professor_id INT NOT NULL,
+    room_id INT NOT NULL,
     session_shift ENUM('MORNING', 'AFTERNOON', 'EVENING', 'WEEKEND') NOT NULL,
-    room VARCHAR(30) NOT NULL,                   -- e.g. 'Room 504'
     days_of_week VARCHAR(50) NOT NULL,           -- e.g. 'Mon - Fri'
     academic_year VARCHAR(20) NOT NULL,          -- e.g. '2025-2026'
     FOREIGN KEY (term_id) REFERENCES terms(id) ON DELETE RESTRICT,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE RESTRICT,
-    FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE RESTRICT,
+    INDEX idx_class_sections_term_id (term_id),
+    INDEX idx_class_sections_course_id (course_id),
+    INDEX idx_class_sections_professor_id (professor_id),
+    INDEX idx_class_sections_academic_year (academic_year)
 );
+
 
 -- 6. Student Enrollments
 CREATE TABLE IF NOT EXISTS enrollments (
@@ -63,7 +90,9 @@ CREATE TABLE IF NOT EXISTS enrollments (
     enrolled_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (class_section_id) REFERENCES class_sections(id) ON DELETE CASCADE,
-    UNIQUE KEY uq_student_section (student_id, class_section_id)
+    UNIQUE KEY uq_student_section (student_id, class_section_id),
+    INDEX idx_enrollments_student_id (student_id),
+    INDEX idx_enrollments_class_section_id (class_section_id)
 );
 
 -- 7. Assessment & Grades Table
@@ -81,21 +110,63 @@ CREATE TABLE IF NOT EXISTS grades (
     FOREIGN KEY (enrollment_id) REFERENCES enrollments(id) ON DELETE CASCADE
 );
 
+-- ==============================================
+-- DATABASE OPTIMIZATIONS (Indexes & Views)
+-- ==============================================
+
+-- 1. Strategic Indexing for High-Performance Queries
+-- (Indexes have been moved into their respective CREATE TABLE definitions to ensure idempotency)
+
+-- 2. Flat View for Student Schedules
+CREATE OR REPLACE VIEW student_schedule_view AS
+SELECT 
+    e.id AS enrollment_id,
+    e.student_id,
+    c.course_code,
+    c.course_title,
+    t.term_name,
+    cs.session_shift,
+    cs.days_of_week,
+    cs.academic_year,
+    r.room_number,
+    p.full_name AS professor_name
+FROM enrollments e
+JOIN class_sections cs ON e.class_section_id = cs.id
+JOIN courses c ON cs.course_id = c.id
+JOIN terms t ON cs.term_id = t.id
+JOIN rooms r ON cs.room_id = r.id
+JOIN users p ON cs.professor_id = p.id;
+
 -- Seed Initial Terms
 INSERT IGNORE INTO terms (term_number, term_name) VALUES
 (1, 'Term 1'), (2, 'Term 2'), (3, 'Term 3'), (4, 'Term 4'),
 (5, 'Term 5'), (6, 'Term 6'), (7, 'Term 7'), (8, 'Term 8');
 
+-- Seed Initial Schools
+INSERT IGNORE INTO schools (school_name) VALUES
+('School of Undergraduate Studies'),
+('School of Graduate Studies'),
+('College of Arts and Humanities'),
+('College of Education'),
+('College of Law'),
+('College of Media and Communications'),
+('College of Science and Technology'),
+('College of Social Sciences'),
+('School of Creative Arts'),
+('School of Foreign Languages'),
+('The Techo Sen School of Government and International Relations'),
+('School of Business');
+
 -- Seed Initial Courses
-INSERT IGNORE INTO courses (course_code, course_title, credits) VALUES
-('ITE 204', 'Java Enterprise Edition', 3),
-('ITE 205', 'Database Systems Administration', 3),
-('ITE 206', 'Computer Networks', 3),
-('ENG 201', 'Advanced Academic English', 3);
+INSERT IGNORE INTO courses (course_code, course_title, credits, school_id) VALUES
+('ITE 204', 'Java Enterprise Edition', 3, 7),
+('ITE 205', 'Database Systems Administration', 3, 7),
+('ITE 206', 'Computer Networks', 3, 7),
+('ENG 201', 'Advanced Academic English', 3, 10);
 
 -- Seed Initial Staff Roles (Verified staff accounts)
 -- Passwords are BCrypt-hashed: admin123, dean123, prof123
-INSERT IGNORE INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active) VALUES
-('admin', '$2a$12$yDvhSPnM7Ne8VReersrfNunoFcOlm1qt78L0/9bQlc6zusej5PBNO', 'System Administrator', 'admin@unitrs.edu', 'ADMIN', 'IT Infrastructure', TRUE, TRUE),
-('dean@unitrs.edu', '$2a$12$xvvaVuiH2ZXkzauGFnMM8OG57jEXbSRy4tSIqFHmJYMXQToZJhl.a', 'Dean of Academic Affairs', 'dean@unitrs.edu', 'DEAN', 'Computer Science', TRUE, TRUE),
-('prof.sok@unitrs.edu', '$2a$12$3PcEw7rrb4hzSvmmVeYsy.zgG9XBMTuQFd5wf.bYSPeaZ0FUGNd0G', 'Prof. Sok Chan', 'prof.sok@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE);
+INSERT IGNORE INTO users (user_identifier, password, full_name, email, role, major, is_verified, is_active, dean_school_id) VALUES
+('admin', '$2a$12$yDvhSPnM7Ne8VReersrfNunoFcOlm1qt78L0/9bQlc6zusej5PBNO', 'System Administrator', 'admin@unitrs.edu', 'ADMIN', 'IT Infrastructure', TRUE, TRUE, NULL),
+('dean@unitrs.edu', '$2a$12$xvvaVuiH2ZXkzauGFnMM8OG57jEXbSRy4tSIqFHmJYMXQToZJhl.a', 'Dean of Science and Tech', 'dean@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE, 7),
+('prof.sok@unitrs.edu', '$2a$12$3PcEw7rrb4hzSvmmVeYsy.zgG9XBMTuQFd5wf.bYSPeaZ0FUGNd0G', 'Prof. Sok Chan', 'prof.sok@unitrs.edu', 'PROFESSOR', 'Computer Science', TRUE, TRUE, NULL);

@@ -73,23 +73,25 @@ public class AuthController extends HttpServlet {
 
         try {
             User user = userService.authenticate(identifierOrEmail.trim(), password);
-
-            // Check if user is verified
             if (!user.isVerified()) {
-                request.setAttribute("error", "Your account has not been verified yet. An administrator must verify your account before you can log in.");
+                request.setAttribute("error",
+                        "Your account has not been verified yet. An administrator must verify your account before you can log in.");
                 request.setAttribute("identifier", identifierOrEmail);
                 request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
                 return;
             }
-
-            // Create session and store user info
             HttpSession session = request.getSession(true);
             session.setAttribute("user", user);
             session.setAttribute("role", user.getRole());
-            session.setMaxInactiveInterval(30 * 60); // 30 minutes
-
-            // Redirect based on role
+            session.setMaxInactiveInterval(30 * 60);
             String contextPath = request.getContextPath();
+            
+            // If they are assigned as a Dean to a school, prioritize Dean dashboard
+            if (user.getDeanSchoolId() != null) {
+                response.sendRedirect(contextPath + "/dean/dashboard");
+                return;
+            }
+
             switch (user.getRole()) {
                 case ADMIN:
                     response.sendRedirect(contextPath + "/admin/dashboard");
@@ -130,7 +132,8 @@ public class AuthController extends HttpServlet {
 
         try {
             userService.registerNewUser(identifier, fullName, email, password, confirmPassword, major);
-            request.setAttribute("success", "Registration successful! Your account is pending verification by an administrator.");
+            request.setAttribute("success",
+                    "Registration successful! Your account is pending verification by an administrator.");
             request.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(request, response);
         } catch (com.unitrs.exceptions.ValidationException e) {
             request.setAttribute("error", e.getMessage());

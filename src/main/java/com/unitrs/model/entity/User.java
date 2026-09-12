@@ -18,5 +18,7 @@ public class User {
     private String major;
     private boolean isVerified;
     private boolean isActive;
+    private Integer deanSchoolId;
+    private Integer studentSchoolId;
     private Timestamp createdAt;
 }

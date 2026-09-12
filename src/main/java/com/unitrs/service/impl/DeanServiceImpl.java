@@ -1,0 +1,404 @@
+package com.unitrs.service.impl;
+
+import com.unitrs.exceptions.ValidationException;
+import com.unitrs.model.entity.Course;
+import com.unitrs.model.entity.Term;
+import com.unitrs.repository.CourseRepository;
+import com.unitrs.repository.TermRepository;
+import com.unitrs.service.DeanService;
+
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+public class DeanServiceImpl implements DeanService {
+
+    private final CourseRepository courseRepository;
+    private final TermRepository termRepository;
+    private final com.unitrs.repository.UserRepository userRepository;
+    private final com.unitrs.repository.ClassSectionRepository classSectionRepository;
+    private final com.unitrs.repository.RoomRepository roomRepository;
+    private final com.unitrs.repository.SchoolRepository schoolRepository;
+
+    public DeanServiceImpl(CourseRepository courseRepository, 
+                           TermRepository termRepository, 
+                           com.unitrs.repository.UserRepository userRepository, 
+                           com.unitrs.repository.ClassSectionRepository classSectionRepository,
+                           com.unitrs.repository.RoomRepository roomRepository,
+                           com.unitrs.repository.SchoolRepository schoolRepository) {
+        this.courseRepository = courseRepository;
+        this.termRepository = termRepository;
+        this.userRepository = userRepository;
+        this.classSectionRepository = classSectionRepository;
+        this.roomRepository = roomRepository;
+        this.schoolRepository = schoolRepository;
+    }
+
+    // --- Course Management ---
+    @Override
+    public List<Course> getAllCourses(int schoolId) {
+        return courseRepository.findBySchoolId(schoolId);
+    }
+
+    @Override
+    public Course getCourseById(int id) {
+        return courseRepository.findById(id);
+    }
+
+    @Override
+    public List<com.unitrs.model.entity.School> getAllSchools() {
+        return schoolRepository.findAll();
+    }
+
+    @Override
+    public com.unitrs.model.entity.School getSchoolById(int id) {
+        return schoolRepository.findById(id);
+    }
+
+    @Override
+    public void addCourse(String courseCode, String courseTitle, int credits, int schoolId) {
+        if (courseCode == null || courseCode.trim().isEmpty()) {
+            throw new ValidationException("Course Code cannot be empty.");
+        }
+        if (courseTitle == null || courseTitle.trim().isEmpty()) {
+            throw new ValidationException("Course Title cannot be empty.");
+        }
+        if (credits <= 0) {
+            throw new ValidationException("Credits must be a positive number.");
+        }
+        if (schoolId <= 0) {
+            throw new ValidationException("School must be selected.");
+        }
+        
+        Course existing = courseRepository.findByCode(courseCode.trim());
+        if (existing != null) {
+            throw new ValidationException("A course with code " + courseCode + " already exists.");
+        }
+
+        Course course = new Course();
+        course.setCourseCode(courseCode.trim().toUpperCase());
+        course.setCourseTitle(courseTitle.trim());
+        course.setCredits(credits);
+        course.setSchoolId(schoolId);
+
+        if (!courseRepository.save(course)) {
+            throw new RuntimeException("Failed to save course.");
+        }
+    }
+
+    @Override
+    public void updateCourse(int id, String courseCode, String courseTitle, int credits, int schoolId) {
+        Course course = courseRepository.findById(id);
+        if (course == null) {
+            throw new ValidationException("Course not found.");
+        }
+        if (schoolId <= 0) {
+            throw new ValidationException("School must be selected.");
+        }
+        
+        Course existing = courseRepository.findByCode(courseCode.trim());
+        if (existing != null && existing.getId() != id) {
+            throw new ValidationException("Another course with code " + courseCode + " already exists.");
+        }
+
+        course.setCourseCode(courseCode.trim().toUpperCase());
+        course.setCourseTitle(courseTitle.trim());
+        course.setCredits(credits);
+        course.setSchoolId(schoolId);
+
+        if (!courseRepository.update(course)) {
+            throw new RuntimeException("Failed to update course.");
+        }
+    }
+
+    @Override
+    public List<Term> getAllTerms() {
+        return termRepository.findAll();
+    }
+
+    @Override
+    public Term getTermById(int id) {
+        return termRepository.findById(id);
+    }
+
+    @Override
+    public void addTerm(int termNumber, String termName) {
+        if (termNumber <= 0) {
+            throw new ValidationException("Term Number must be positive.");
+        }
+        if (termName == null || termName.trim().isEmpty()) {
+            throw new ValidationException("Term Name cannot be empty.");
+        }
+
+        Term existing = termRepository.findByNumber(termNumber);
+        if (existing != null) {
+            throw new ValidationException("Term Number " + termNumber + " already exists.");
+        }
+
+        Term term = new Term();
+        term.setTermNumber(termNumber);
+        term.setTermName(termName.trim());
+
+        if (!termRepository.save(term)) {
+            throw new RuntimeException("Failed to save term.");
+        }
+    }
+
+    @Override
+    public void updateTerm(int id, int termNumber, String termName) {
+        Term term = termRepository.findById(id);
+        if (term == null) {
+            throw new ValidationException("Term not found.");
+        }
+
+        Term existing = termRepository.findByNumber(termNumber);
+        if (existing != null && existing.getId() != id) {
+            throw new ValidationException("Another term with number " + termNumber + " already exists.");
+        }
+
+        term.setTermNumber(termNumber);
+        term.setTermName(termName.trim());
+
+        if (!termRepository.update(term)) {
+            throw new RuntimeException("Failed to update term.");
+        }
+    }
+
+    @Override
+    public void assignCourseToTerm(int termId, int courseId) {
+        List<Course> currentCourses = termRepository.findCoursesByTerm(termId);
+        if (currentCourses.size() >= 5) {
+            throw new ValidationException("A term can only have a maximum of 5 courses bundled.");
+        }
+        
+        // Will silently ignore if already assigned due to INSERT IGNORE in repository
+        termRepository.assignCourseToTerm(termId, courseId);
+    }
+
+    @Override
+    public void removeCourseFromTerm(int termId, int courseId) {
+        termRepository.removeCourseFromTerm(termId, courseId);
+    }
+
+    @Override
+    public Map<Term, List<Course>> getTermCurriculumMap(int schoolId) {
+        List<Term> terms = termRepository.findAll();
+        Map<Term, List<Course>> map = new LinkedHashMap<>();
+        
+        for (Term term : terms) {
+            List<Course> courses = termRepository.findCoursesByTerm(term.getId());
+            // Filter courses to only include those belonging to the dean's school
+            courses.removeIf(c -> c.getSchoolId() != schoolId);
+            map.put(term, courses);
+        }
+        
+        return map;
+    }
+
+    // --- Faculty, Students & Scheduling ---
+    @Override
+    public List<com.unitrs.model.entity.User> getAllProfessors() {
+        return userRepository.findProfessors();
+    }
+
+    @Override
+    public List<com.unitrs.model.entity.User> getStudentsBySchool(int schoolId) {
+        return userRepository.findStudentsBySchool(schoolId);
+    }
+
+    @Override
+    public List<com.unitrs.model.entity.ClassSection> getAllClassSections() {
+        return classSectionRepository.findAllSections();
+    }
+
+    @Override
+    public void addClassSection(int termId, int courseId, int professorId, int roomId, String sessionShift, String daysOfWeek, String academicYear) {
+        if (daysOfWeek == null || daysOfWeek.trim().isEmpty()) {
+            throw new ValidationException("Days of week cannot be empty.");
+        }
+        if (academicYear == null || academicYear.trim().isEmpty()) {
+            throw new ValidationException("Academic Year cannot be empty.");
+        }
+
+        // Verify that the course is actually assigned to the term!
+        List<Course> coursesInTerm = termRepository.findCoursesByTerm(termId);
+        boolean courseAssigned = coursesInTerm.stream().anyMatch(c -> c.getId() == courseId);
+        if (!courseAssigned) {
+            throw new ValidationException("Cannot schedule: This course is not bundled into the selected term.");
+        }
+
+        // Auto-Calculate Exact Days based on Bundle Size
+        String exactDays = daysOfWeek.trim();
+        List<com.unitrs.model.entity.ClassSection> allSections = classSectionRepository.findAllSections();
+        
+        if ("Mon-Fri".equalsIgnoreCase(exactDays)) {
+            int totalCourses = coursesInTerm.size();
+            
+            // Find how many courses are already scheduled for this Term, Shift, and Academic Year
+            long scheduledCount = allSections.stream()
+                .filter(s -> s.getTermId() == termId 
+                          && s.getSessionShift().name().equals(sessionShift)
+                          && s.getAcademicYear().equals(academicYear.trim()))
+                .count();
+                
+            int slotIndex = (int) scheduledCount;
+            exactDays = calculateMonFriDays(totalCourses, slotIndex);
+        }
+
+        // Double-Booking Validation (Professor)
+        for (com.unitrs.model.entity.ClassSection existing : allSections) {
+            if (existing.getProfessorId() == professorId && 
+                existing.getAcademicYear().equals(academicYear.trim()) &&
+                existing.getTermId() == termId &&
+                existing.getSessionShift().name().equals(sessionShift)) {
+                
+                if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
+                    throw new ValidationException("Professor is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
+                }
+            }
+        }
+
+        // Double-Booking Validation (Room) - optional but good to have
+        for (com.unitrs.model.entity.ClassSection existing : allSections) {
+            if (existing.getRoomId() == roomId && 
+                existing.getAcademicYear().equals(academicYear.trim()) &&
+                existing.getTermId() == termId &&
+                existing.getSessionShift().name().equals(sessionShift)) {
+                
+                if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
+                    throw new ValidationException("Room is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
+                }
+            }
+        }
+
+        com.unitrs.model.entity.ClassSection section = new com.unitrs.model.entity.ClassSection();
+        section.setTermId(termId);
+        section.setCourseId(courseId);
+        section.setProfessorId(professorId);
+        section.setRoomId(roomId);
+        section.setSessionShift(com.unitrs.model.entity.SessionShift.valueOf(sessionShift));
+        section.setDaysOfWeek(exactDays);
+        section.setAcademicYear(academicYear.trim());
+
+        if (!classSectionRepository.save(section)) {
+            throw new RuntimeException("Failed to save class section.");
+        }
+    }
+
+    private boolean daysOverlap(String days1, String days2) {
+        String[] allDays = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+        for (String day : allDays) {
+            if (containsDay(days1, day) && containsDay(days2, day)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsDay(String daysString, String day) {
+        if (daysString == null) return false;
+        if (daysString.equalsIgnoreCase("Mon-Fri")) {
+            return day.equals("Mon") || day.equals("Tue") || day.equals("Wed") || day.equals("Thu") || day.equals("Fri");
+        }
+        if (daysString.equalsIgnoreCase("Sat-Sun")) {
+            return day.equals("Sat") || day.equals("Sun");
+        }
+        return daysString.contains(day);
+    }
+
+    private String calculateMonFriDays(int totalCourses, int slotIndex) {
+        if (totalCourses <= 0) return "Mon-Fri";
+        if (slotIndex >= totalCourses) slotIndex = totalCourses - 1; // Safety fallback
+        
+        if (totalCourses >= 5) {
+            String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+            return slotIndex < 5 ? days[slotIndex] : "Fri";
+        } else if (totalCourses == 4) {
+            String[] days = {"Mon, Tue", "Wed", "Thu", "Fri"};
+            return days[slotIndex];
+        } else if (totalCourses == 3) {
+            String[] days = {"Mon, Tue", "Wed, Thu", "Fri"};
+            return days[slotIndex];
+        } else if (totalCourses == 2) {
+            String[] days = {"Mon, Tue, Wed", "Thu, Fri"};
+            return days[slotIndex];
+        } else {
+            return "Mon-Fri";
+        }
+    }
+
+    @Override
+    public void removeClassSection(int id) {
+        if (!classSectionRepository.delete(id)) {
+            throw new RuntimeException("Failed to delete class section.");
+        }
+    }
+
+    // --- Facilities & Rooms ---
+    @Override
+    public List<com.unitrs.model.entity.Room> getAllRooms() {
+        return roomRepository.findAllRooms();
+    }
+
+    @Override
+    public void addRoom(String roomNumber, int floorNumber, int capacity) {
+        if (roomNumber == null || roomNumber.trim().isEmpty()) {
+            throw new ValidationException("Room Number cannot be empty.");
+        }
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be greater than 0.");
+        }
+        
+        com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumber.trim());
+        if (existing != null) {
+            throw new ValidationException("Room " + roomNumber + " already exists.");
+        }
+
+        com.unitrs.model.entity.Room room = new com.unitrs.model.entity.Room();
+        room.setRoomNumber(roomNumber.trim());
+        room.setFloorNumber(floorNumber);
+        room.setCapacity(capacity);
+
+        if (!roomRepository.save(room)) {
+            throw new RuntimeException("Failed to save room.");
+        }
+    }
+
+    @Override
+    public void addRoomsBatch(int floorNumber, int numberOfRooms, int capacityPerRoom) {
+        if (numberOfRooms <= 0) {
+            throw new ValidationException("Number of rooms must be positive.");
+        }
+        if (capacityPerRoom <= 0) {
+            throw new ValidationException("Capacity must be positive.");
+        }
+        
+        // Find a starting index for the room numbers on this floor
+        // Simplistic approach: Generate Room X01, X02 based on floor X
+        int baseRoomNumber = floorNumber * 100;
+        int roomsCreated = 0;
+        int i = 1;
+        
+        while (roomsCreated < numberOfRooms) {
+            String roomNumStr = "Room " + (baseRoomNumber + i);
+            com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumStr);
+            if (existing == null) {
+                com.unitrs.model.entity.Room room = new com.unitrs.model.entity.Room();
+                room.setRoomNumber(roomNumStr);
+                room.setFloorNumber(floorNumber);
+                room.setCapacity(capacityPerRoom);
+                roomRepository.save(room);
+                roomsCreated++;
+            }
+            i++;
+            if (i > 1000) break; // safety breakout
+        }
+    }
+
+    @Override
+    public void deleteRoom(int id) {
+        if (!roomRepository.delete(id)) {
+            throw new ValidationException("Failed to delete room. It might be assigned to an active class section.");
+        }
+    }
+}

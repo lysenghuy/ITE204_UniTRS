@@ -11,8 +11,8 @@ public class ClassSection {
     private int termId;
     private int courseId;
     private int professorId;
+    private int roomId;
     private SessionShift sessionShift;
-    private String room;
     private String daysOfWeek;
     private String academicYear;
     private String courseCode;
@@ -20,4 +20,7 @@ public class ClassSection {
     private int credits;
     private String professorName;
     private String termName;
+    private String roomName;
+    private int roomCapacity;
+    private int enrolledCount;
 }
