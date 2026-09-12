@@ -24,7 +24,13 @@ public class DeanController extends HttpServlet {
 
     @Override
     public void init() throws ServletException {
-        this.deanService = new DeanServiceImpl(new CourseRepository(), new TermRepository());
+        this.deanService = new DeanServiceImpl(
+            new CourseRepository(), 
+            new TermRepository(), 
+            new com.unitrs.repository.UserRepository(), 
+            new com.unitrs.repository.ClassSectionRepository(),
+            new com.unitrs.repository.RoomRepository()
+        );
     }
 
     @Override
@@ -43,10 +49,16 @@ public class DeanController extends HttpServlet {
         List<Course> courses = deanService.getAllCourses();
         List<Term> terms = deanService.getAllTerms();
         Map<Term, List<Course>> curriculumMap = deanService.getTermCurriculumMap();
+        List<com.unitrs.model.entity.User> professors = deanService.getAllProfessors();
+        List<com.unitrs.model.entity.ClassSection> sections = deanService.getAllClassSections();
+        List<com.unitrs.model.entity.Room> rooms = deanService.getAllRooms();
 
         request.setAttribute("courses", courses);
         request.setAttribute("terms", terms);
         request.setAttribute("curriculumMap", curriculumMap);
+        request.setAttribute("professors", professors);
+        request.setAttribute("sections", sections);
+        request.setAttribute("rooms", rooms);
 
         // Retain the active tab state if provided (for returning after a form submission)
         String activeTab = request.getParameter("tab");
@@ -107,6 +119,47 @@ public class DeanController extends HttpServlet {
                 int courseId = Integer.parseInt(request.getParameter("courseId"));
                 deanService.removeCourseFromTerm(termId, courseId);
                 request.setAttribute("successMessage", "Course removed from Term.");
+
+            } else if ("addClassSection".equals(action)) {
+                activeTab = "schedules";
+                int termId = Integer.parseInt(request.getParameter("termId"));
+                int courseId = Integer.parseInt(request.getParameter("courseId"));
+                int professorId = Integer.parseInt(request.getParameter("professorId"));
+                int roomId = Integer.parseInt(request.getParameter("roomId"));
+                String sessionShift = request.getParameter("sessionShift");
+                String daysOfWeek = request.getParameter("daysOfWeek");
+                String academicYear = request.getParameter("academicYear");
+                
+                deanService.addClassSection(termId, courseId, professorId, roomId, sessionShift, daysOfWeek, academicYear);
+                request.setAttribute("successMessage", "Class Section successfully scheduled.");
+                
+            } else if ("removeClassSection".equals(action)) {
+                activeTab = "schedules";
+                int id = Integer.parseInt(request.getParameter("sectionId"));
+                deanService.removeClassSection(id);
+                request.setAttribute("successMessage", "Class Section removed.");
+
+            } else if ("addRoom".equals(action)) {
+                activeTab = "facilities";
+                String roomNumber = request.getParameter("roomNumber");
+                int floorNumber = Integer.parseInt(request.getParameter("floorNumber"));
+                int capacity = Integer.parseInt(request.getParameter("capacity"));
+                deanService.addRoom(roomNumber, floorNumber, capacity);
+                request.setAttribute("successMessage", "Room successfully created.");
+
+            } else if ("addRoomsBatch".equals(action)) {
+                activeTab = "facilities";
+                int floorNumber = Integer.parseInt(request.getParameter("floorNumber"));
+                int numberOfRooms = Integer.parseInt(request.getParameter("numberOfRooms"));
+                int capacityPerRoom = Integer.parseInt(request.getParameter("capacityPerRoom"));
+                deanService.addRoomsBatch(floorNumber, numberOfRooms, capacityPerRoom);
+                request.setAttribute("successMessage", numberOfRooms + " rooms successfully generated for Floor " + floorNumber + ".");
+
+            } else if ("deleteRoom".equals(action)) {
+                activeTab = "facilities";
+                int id = Integer.parseInt(request.getParameter("roomId"));
+                deanService.deleteRoom(id);
+                request.setAttribute("successMessage", "Room deleted.");
             }
 
         } catch (ValidationException | NumberFormatException e) {

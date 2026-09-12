@@ -15,10 +15,20 @@ public class DeanServiceImpl implements DeanService {
 
     private final CourseRepository courseRepository;
     private final TermRepository termRepository;
+    private final com.unitrs.repository.UserRepository userRepository;
+    private final com.unitrs.repository.ClassSectionRepository classSectionRepository;
+    private final com.unitrs.repository.RoomRepository roomRepository;
 
-    public DeanServiceImpl(CourseRepository courseRepository, TermRepository termRepository) {
+    public DeanServiceImpl(CourseRepository courseRepository, 
+                           TermRepository termRepository, 
+                           com.unitrs.repository.UserRepository userRepository, 
+                           com.unitrs.repository.ClassSectionRepository classSectionRepository,
+                           com.unitrs.repository.RoomRepository roomRepository) {
         this.courseRepository = courseRepository;
         this.termRepository = termRepository;
+        this.userRepository = userRepository;
+        this.classSectionRepository = classSectionRepository;
+        this.roomRepository = roomRepository;
     }
 
     @Override
@@ -134,6 +144,11 @@ public class DeanServiceImpl implements DeanService {
 
     @Override
     public void assignCourseToTerm(int termId, int courseId) {
+        List<Course> currentCourses = termRepository.findCoursesByTerm(termId);
+        if (currentCourses.size() >= 5) {
+            throw new ValidationException("A term can only have a maximum of 5 courses bundled.");
+        }
+        
         // Will silently ignore if already assigned due to INSERT IGNORE in repository
         termRepository.assignCourseToTerm(termId, courseId);
     }
@@ -154,5 +169,159 @@ public class DeanServiceImpl implements DeanService {
         }
         
         return map;
+    }
+
+    // --- Faculty & Scheduling ---
+    @Override
+    public List<com.unitrs.model.entity.User> getAllProfessors() {
+        return userRepository.findProfessors();
+    }
+
+    @Override
+    public List<com.unitrs.model.entity.ClassSection> getAllClassSections() {
+        return classSectionRepository.findAllSections();
+    }
+
+    @Override
+    public void addClassSection(int termId, int courseId, int professorId, int roomId, String sessionShift, String daysOfWeek, String academicYear) {
+        if (daysOfWeek == null || daysOfWeek.trim().isEmpty()) {
+            throw new ValidationException("Days of week cannot be empty.");
+        }
+        if (academicYear == null || academicYear.trim().isEmpty()) {
+            throw new ValidationException("Academic Year cannot be empty.");
+        }
+
+        // Verify that the course is actually assigned to the term!
+        List<Course> coursesInTerm = termRepository.findCoursesByTerm(termId);
+        boolean courseAssigned = coursesInTerm.stream().anyMatch(c -> c.getId() == courseId);
+        if (!courseAssigned) {
+            throw new ValidationException("Cannot schedule: This course is not bundled into the selected term.");
+        }
+
+        // Auto-Calculate Exact Days based on Bundle Size
+        String exactDays = daysOfWeek.trim();
+        if ("Mon-Fri".equalsIgnoreCase(exactDays)) {
+            int totalCourses = coursesInTerm.size();
+            
+            // Find how many courses are already scheduled for this Term, Shift, and Academic Year
+            List<com.unitrs.model.entity.ClassSection> allSections = classSectionRepository.findAllSections();
+            long scheduledCount = allSections.stream()
+                .filter(s -> s.getTermId() == termId 
+                          && s.getSessionShift().name().equals(sessionShift)
+                          && s.getAcademicYear().equals(academicYear.trim()))
+                .count();
+                
+            int slotIndex = (int) scheduledCount;
+            exactDays = calculateMonFriDays(totalCourses, slotIndex);
+        }
+
+        com.unitrs.model.entity.ClassSection section = new com.unitrs.model.entity.ClassSection();
+        section.setTermId(termId);
+        section.setCourseId(courseId);
+        section.setProfessorId(professorId);
+        section.setRoomId(roomId);
+        section.setSessionShift(com.unitrs.model.entity.SessionShift.valueOf(sessionShift));
+        section.setDaysOfWeek(exactDays);
+        section.setAcademicYear(academicYear.trim());
+
+        if (!classSectionRepository.save(section)) {
+            throw new RuntimeException("Failed to save class section.");
+        }
+    }
+
+    private String calculateMonFriDays(int totalCourses, int slotIndex) {
+        if (totalCourses <= 0) return "Mon-Fri";
+        if (slotIndex >= totalCourses) slotIndex = totalCourses - 1; // Safety fallback
+        
+        if (totalCourses >= 5) {
+            String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri"};
+            return slotIndex < 5 ? days[slotIndex] : "Fri";
+        } else if (totalCourses == 4) {
+            String[] days = {"Mon, Tue", "Wed", "Thu", "Fri"};
+            return days[slotIndex];
+        } else if (totalCourses == 3) {
+            String[] days = {"Mon, Tue", "Wed, Thu", "Fri"};
+            return days[slotIndex];
+        } else if (totalCourses == 2) {
+            String[] days = {"Mon, Tue, Wed", "Thu, Fri"};
+            return days[slotIndex];
+        } else {
+            return "Mon-Fri";
+        }
+    }
+
+    @Override
+    public void removeClassSection(int id) {
+        if (!classSectionRepository.delete(id)) {
+            throw new RuntimeException("Failed to delete class section.");
+        }
+    }
+
+    // --- Facilities & Rooms ---
+    @Override
+    public List<com.unitrs.model.entity.Room> getAllRooms() {
+        return roomRepository.findAllRooms();
+    }
+
+    @Override
+    public void addRoom(String roomNumber, int floorNumber, int capacity) {
+        if (roomNumber == null || roomNumber.trim().isEmpty()) {
+            throw new ValidationException("Room Number cannot be empty.");
+        }
+        if (capacity <= 0) {
+            throw new ValidationException("Capacity must be greater than 0.");
+        }
+        
+        com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumber.trim());
+        if (existing != null) {
+            throw new ValidationException("Room " + roomNumber + " already exists.");
+        }
+
+        com.unitrs.model.entity.Room room = new com.unitrs.model.entity.Room();
+        room.setRoomNumber(roomNumber.trim());
+        room.setFloorNumber(floorNumber);
+        room.setCapacity(capacity);
+
+        if (!roomRepository.save(room)) {
+            throw new RuntimeException("Failed to save room.");
+        }
+    }
+
+    @Override
+    public void addRoomsBatch(int floorNumber, int numberOfRooms, int capacityPerRoom) {
+        if (numberOfRooms <= 0) {
+            throw new ValidationException("Number of rooms must be positive.");
+        }
+        if (capacityPerRoom <= 0) {
+            throw new ValidationException("Capacity must be positive.");
+        }
+        
+        // Find a starting index for the room numbers on this floor
+        // Simplistic approach: Generate Room X01, X02 based on floor X
+        int baseRoomNumber = floorNumber * 100;
+        int roomsCreated = 0;
+        int i = 1;
+        
+        while (roomsCreated < numberOfRooms) {
+            String roomNumStr = "Room " + (baseRoomNumber + i);
+            com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumStr);
+            if (existing == null) {
+                com.unitrs.model.entity.Room room = new com.unitrs.model.entity.Room();
+                room.setRoomNumber(roomNumStr);
+                room.setFloorNumber(floorNumber);
+                room.setCapacity(capacityPerRoom);
+                roomRepository.save(room);
+                roomsCreated++;
+            }
+            i++;
+            if (i > 1000) break; // safety breakout
+        }
+    }
+
+    @Override
+    public void deleteRoom(int id) {
+        if (!roomRepository.delete(id)) {
+            throw new ValidationException("Failed to delete room. It might be assigned to an active class section.");
+        }
     }
 }

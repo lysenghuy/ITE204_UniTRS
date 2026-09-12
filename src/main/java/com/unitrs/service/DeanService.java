@@ -25,4 +25,16 @@ public interface DeanService {
     
     // Returns a map where the key is the Term, and the value is a list of Courses assigned to it.
     Map<Term, List<Course>> getTermCurriculumMap();
+
+    // --- Faculty & Scheduling ---
+    List<com.unitrs.model.entity.User> getAllProfessors();
+    List<com.unitrs.model.entity.ClassSection> getAllClassSections();
+    void addClassSection(int termId, int courseId, int professorId, int roomId, String sessionShift, String daysOfWeek, String academicYear);
+    void removeClassSection(int id);
+
+    // --- Facilities & Rooms ---
+    List<com.unitrs.model.entity.Room> getAllRooms();
+    void addRoom(String roomNumber, int floorNumber, int capacity);
+    void addRoomsBatch(int floorNumber, int numberOfRooms, int capacityPerRoom);
+    void deleteRoom(int id);
 }

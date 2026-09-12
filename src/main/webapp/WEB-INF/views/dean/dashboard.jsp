@@ -60,6 +60,12 @@
             <li class="nav-item" role="presentation">
                 <button class="nav-link ${activeTab == 'bundles' ? 'active' : ''}" id="bundles-tab" data-bs-toggle="tab" data-bs-target="#bundles" type="button" role="tab"><i class="bi bi-collection me-2"></i>Curriculum Bundling</button>
             </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link ${activeTab == 'schedules' ? 'active' : ''}" id="schedules-tab" data-bs-toggle="tab" data-bs-target="#schedules" type="button" role="tab"><i class="bi bi-clock-history me-2"></i>Class Schedules</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link ${activeTab == 'facilities' ? 'active' : ''}" id="facilities-tab" data-bs-toggle="tab" data-bs-target="#facilities" type="button" role="tab"><i class="bi bi-building me-2"></i>Facility Management</button>
+            </li>
         </ul>
 
         <!-- Tab Content -->
@@ -293,6 +299,100 @@
                 </div>
             </div>
 
+            <!-- 4. Class Schedules Tab -->
+            <div class="tab-pane fade ${activeTab == 'schedules' ? 'show active' : ''}" id="schedules" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Class Schedules & Faculty Assignment</h4>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scheduleClassModal"><i class="bi bi-plus-lg me-1"></i> Schedule Class</button>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Term</th>
+                                    <th>Course</th>
+                                    <th>Professor</th>
+                                    <th>Schedule</th>
+                                    <th>Room</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="section" items="${sections}">
+                                    <tr>
+                                        <td><span class="badge bg-info text-dark">${section.termName}</span><br><small class="text-muted">${section.academicYear}</small></td>
+                                        <td><strong>${section.courseCode}</strong><br><small>${section.courseTitle}</small></td>
+                                        <td><i class="bi bi-person-badge text-primary me-1"></i> ${section.professorName}</td>
+                                        <td>
+                                            <span class="badge bg-light text-dark border">${section.sessionShift}</span><br>
+                                            <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>${section.daysOfWeek}</small>
+                                        </td>
+                                        <td><i class="bi bi-door-open me-1"></i>${section.roomName} <br><small class="text-muted">Cap: ${section.roomCapacity}</small></td>
+                                        <td class="text-end">
+                                            <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" style="display:inline;">
+                                                <input type="hidden" name="action" value="removeClassSection">
+                                                <input type="hidden" name="sectionId" value="${section.id}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure you want to delete this scheduled class?');"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty sections}">
+                                    <tr><td colspan="6" class="text-center text-muted py-4">No classes have been scheduled yet.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Facility Management Tab -->
+            <div class="tab-pane fade ${activeTab == 'facilities' ? 'show active' : ''}" id="facilities" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">Physical Facility Management</h4>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2" data-bs-toggle="modal" data-bs-target="#batchRoomModal"><i class="bi bi-layers me-1"></i> Batch Generate Rooms</button>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal"><i class="bi bi-plus-lg me-1"></i> Add Single Room</button>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Floor</th>
+                                    <th>Room Number</th>
+                                    <th>Max Capacity (Seats)</th>
+                                    <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="room" items="${rooms}">
+                                    <tr>
+                                        <td>Floor ${room.floorNumber}</td>
+                                        <td><strong><i class="bi bi-door-open me-1"></i> ${room.roomNumber}</strong></td>
+                                        <td><span class="badge bg-secondary">${room.capacity} seats</span></td>
+                                        <td class="text-end">
+                                            <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" style="display:inline;">
+                                                <input type="hidden" name="action" value="deleteRoom">
+                                                <input type="hidden" name="roomId" value="${room.id}">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this room?');"><i class="bi bi-trash"></i></button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty rooms}">
+                                    <tr><td colspan="4" class="text-center text-muted py-4">No rooms have been created yet. Generate a floor batch to begin.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </div> <!-- End Tab Content -->
     </div>
 
@@ -354,6 +454,143 @@
         </div>
     </div>
 
+    <!-- Schedule Class Modal -->
+    <div class="modal fade" id="scheduleClassModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" class="modal-content">
+                <input type="hidden" name="action" value="addClassSection">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule New Class</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Term</label>
+                            <select name="termId" class="form-select" id="termSelect" required>
+                                <option value="">-- Choose Term --</option>
+                                <c:forEach var="entry" items="${curriculumMap}">
+                                    <c:if test="${not empty entry.value}">
+                                        <option value="${entry.key.id}">${entry.key.termName}</option>
+                                    </c:if>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Course (Assigned to Term)</label>
+                            <select name="courseId" class="form-select" id="courseSelect" required>
+                                <option value="">-- Choose Course --</option>
+                            </select>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Assign Professor</label>
+                            <select name="professorId" class="form-select" required>
+                                <option value="">-- Choose Professor --</option>
+                                <c:forEach var="prof" items="${professors}">
+                                    <option value="${prof.id}">${prof.fullName} (${prof.email})</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Shift</label>
+                            <select name="sessionShift" class="form-select" required>
+                                <option value="MORNING">Morning</option>
+                                <option value="AFTERNOON">Afternoon</option>
+                                <option value="EVENING">Evening</option>
+                                <option value="WEEKEND">Weekend</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Room</label>
+                            <select name="roomId" class="form-select" required>
+                                <option value="">-- Choose Room --</option>
+                                <c:forEach var="room" items="${rooms}">
+                                    <option value="${room.id}">${room.roomNumber} (Cap: ${room.capacity})</option>
+                                </c:forEach>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Days</label>
+                            <select name="daysOfWeek" class="form-select" required>
+                                <option value="Mon-Fri">Mon-Fri (Weekday)</option>
+                                <option value="Sat-Sun">Sat-Sun (Weekend)</option>
+                            </select>
+                            <small class="text-muted d-block mt-1" style="font-size: 0.75rem;">Exact days will be auto-calculated</small>
+                        </div>
+                        <div class="col-md-12">
+                            <label class="form-label">Academic Year</label>
+                            <input type="text" class="form-control" name="academicYear" placeholder="e.g. 2026-2027" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Schedule Class</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Single Room Modal -->
+    <div class="modal fade" id="addRoomModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" class="modal-content">
+                <input type="hidden" name="action" value="addRoom">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Physical Room</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Room Number</label>
+                        <input type="text" class="form-control" name="roomNumber" placeholder="e.g. Room 501" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Floor Number</label>
+                        <input type="number" class="form-control" name="floorNumber" min="1" max="10" placeholder="e.g. 5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Maximum Seating Capacity</label>
+                        <input type="number" class="form-control" name="capacity" min="1" placeholder="e.g. 40" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Create Room</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Batch Generate Rooms Modal -->
+    <div class="modal fade" id="batchRoomModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" class="modal-content">
+                <input type="hidden" name="action" value="addRoomsBatch">
+                <div class="modal-header">
+                    <h5 class="modal-title">Batch Generate Rooms</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info py-2"><i class="bi bi-info-circle me-1"></i> Instantly generate multiple identical rooms for a specific floor.</div>
+                    <div class="mb-3">
+                        <label class="form-label">Floor Number</label>
+                        <input type="number" class="form-control" name="floorNumber" min="1" max="10" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Number of Rooms to Generate</label>
+                        <input type="number" class="form-control" name="numberOfRooms" min="1" max="50" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacity (Per Room)</label>
+                        <input type="number" class="form-control" name="capacityPerRoom" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-secondary">Generate Batch</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Update URL hash without jumping to keep tab state clean on refresh
@@ -364,6 +601,31 @@
                 // We use history replaceState to not create a mess of back-buttons
                 window.history.replaceState(null, null, '?tab=' + target);
             });
+        });
+
+        // Dynamic Course Dropdown based on Term Selection
+        const termCoursesMap = {};
+        <c:forEach var="entry" items="${curriculumMap}">
+            termCoursesMap[${entry.key.id}] = [
+                <c:forEach var="course" items="${entry.value}">
+                    { id: ${course.id}, code: "${course.courseCode}", title: "${course.courseTitle}" },
+                </c:forEach>
+            ];
+        </c:forEach>
+        
+        document.getElementById('termSelect').addEventListener('change', function() {
+            const termId = this.value;
+            const courseSelect = document.getElementById('courseSelect');
+            courseSelect.innerHTML = '<option value="">-- Choose Course --</option>';
+            
+            if (termId && termCoursesMap[termId]) {
+                termCoursesMap[termId].forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course.id;
+                    option.textContent = course.code + ' - ' + course.title;
+                    courseSelect.appendChild(option);
+                });
+            }
         });
     </script>
 </body>

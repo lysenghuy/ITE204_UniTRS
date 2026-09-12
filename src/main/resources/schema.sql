@@ -40,20 +40,30 @@ CREATE TABLE IF NOT EXISTS term_courses (
     UNIQUE KEY uq_term_course (term_id, course_id)
 );
 
--- 5. Class Sections (Actual scheduled classes per term, shift, and professor)
+-- 5. Rooms (Physical space capacity)
+CREATE TABLE IF NOT EXISTS rooms (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    room_number VARCHAR(20) NOT NULL UNIQUE,
+    floor_number INT NOT NULL,
+    capacity INT NOT NULL
+);
+
+-- 6. Class Sections (Actual scheduled classes per term, shift, and professor)
 CREATE TABLE IF NOT EXISTS class_sections (
     id INT AUTO_INCREMENT PRIMARY KEY,
     term_id INT NOT NULL,
     course_id INT NOT NULL,
     professor_id INT NOT NULL,
+    room_id INT NOT NULL,
     session_shift ENUM('MORNING', 'AFTERNOON', 'EVENING', 'WEEKEND') NOT NULL,
-    room VARCHAR(30) NOT NULL,                   -- e.g. 'Room 504'
     days_of_week VARCHAR(50) NOT NULL,           -- e.g. 'Mon - Fri'
     academic_year VARCHAR(20) NOT NULL,          -- e.g. '2025-2026'
     FOREIGN KEY (term_id) REFERENCES terms(id) ON DELETE RESTRICT,
     FOREIGN KEY (course_id) REFERENCES courses(id) ON DELETE RESTRICT,
-    FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE RESTRICT
+    FOREIGN KEY (professor_id) REFERENCES users(id) ON DELETE RESTRICT,
+    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE RESTRICT
 );
+
 
 -- 6. Student Enrollments
 CREATE TABLE IF NOT EXISTS enrollments (
