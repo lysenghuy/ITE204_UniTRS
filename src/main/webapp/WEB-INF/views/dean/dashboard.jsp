@@ -73,29 +73,52 @@
             
             <!-- 1. Master Courses Tab -->
             <div class="tab-pane fade ${activeTab == 'courses' ? 'show active' : ''}" id="courses" role="tabpanel">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">Course Catalog</h4>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="bi bi-plus-lg me-1"></i> Add Course</button>
-                </div>
-                
-                <div class="card card-custom">
-                    <div class="card-body p-0">
-                        <table class="table table-hover mb-0">
-                            <thead>
+                <div class="row">
+                    <!-- Sidebar: School Filter -->
+                    <div class="col-md-3 mb-4">
+                        <div class="card card-custom">
+                            <div class="card-header bg-white fw-bold py-3">
+                                <i class="bi bi-funnel me-2"></i>Filter by School
+                            </div>
+                            <div class="list-group list-group-flush" id="schoolFilter">
+                                <button type="button" class="list-group-item list-group-item-action active" data-school-id="all">
+                                    All Schools
+                                </button>
+                                <c:forEach var="school" items="${schools}">
+                                    <button type="button" class="list-group-item list-group-item-action" data-school-id="${school.id}">
+                                        ${school.schoolName}
+                                    </button>
+                                </c:forEach>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Main Content: Course Catalog -->
+                    <div class="col-md-9">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h4 class="mb-0">Course Catalog</h4>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="bi bi-plus-lg me-1"></i> Add Course</button>
+                        </div>
+                        
+                        <div class="card card-custom">
+                            <div class="card-body p-0">
+                                <table class="table table-hover mb-0" id="coursesTable">
+                                    <thead>
                                 <tr>
                                     <th>ID</th>
                                     <th>Course Code</th>
                                     <th>Course Title</th>
+                                    <th>School / College</th>
                                     <th>Credits</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <c:forEach var="course" items="${courses}">
-                                    <tr>
+                                    <tr class="course-row" data-course-school-id="${course.schoolId}">
                                         <td>${course.id}</td>
                                         <td><span class="badge bg-secondary">${course.courseCode}</span></td>
                                         <td>${course.courseTitle}</td>
+                                        <td><small class="text-muted"><i class="bi bi-building me-1"></i>${course.schoolName}</small></td>
                                         <td>${course.credits}</td>
                                         <td class="text-end">
                                             <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#editCourseModal${course.id}"><i class="bi bi-pencil"></i> Edit</button>
@@ -122,6 +145,15 @@
                                                         <input type="text" class="form-control" name="courseTitle" value="${course.courseTitle}" required>
                                                     </div>
                                                     <div class="mb-3">
+                                                        <label class="form-label">School / College</label>
+                                                        <select name="schoolId" class="form-select" required>
+                                                            <option value="">-- Select School --</option>
+                                                            <c:forEach var="school" items="${schools}">
+                                                                <option value="${school.id}" ${course.schoolId == school.id ? 'selected' : ''}>${school.schoolName}</option>
+                                                            </c:forEach>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
                                                         <label class="form-label">Credits</label>
                                                         <input type="number" class="form-control" name="credits" value="${course.credits}" required min="1" max="10">
                                                     </div>
@@ -134,13 +166,16 @@
                                     </div>
                                 </c:forEach>
                                 <c:if test="${empty courses}">
-                                    <tr><td colspan="5" class="text-center text-muted py-4">No courses available.</td></tr>
+                                    <tr id="noCoursesRow"><td colspan="6" class="text-center text-muted py-4">No courses available.</td></tr>
                                 </c:if>
+                                <tr id="noFilteredCoursesRow" style="display: none;"><td colspan="6" class="text-center text-muted py-4">No courses available for the selected school.</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </div> <!-- End Main Content -->
+        </div> <!-- End Row -->
+    </div> <!-- End Master Courses Tab -->
 
             <!-- 2. Academic Terms Tab -->
             <div class="tab-pane fade ${activeTab == 'terms' ? 'show active' : ''}" id="terms" role="tabpanel">
@@ -417,6 +452,15 @@
                         <input type="text" class="form-control" name="courseTitle" required>
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">School / College</label>
+                        <select name="schoolId" class="form-select" required>
+                            <option value="">-- Select School --</option>
+                            <c:forEach var="school" items="${schools}">
+                                <option value="${school.id}">${school.schoolName}</option>
+                            </c:forEach>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="form-label">Credits</label>
                         <input type="number" class="form-control" name="credits" value="3" required min="1" max="10">
                     </div>
@@ -626,6 +670,44 @@
                     courseSelect.appendChild(option);
                 });
             }
+        });
+
+        // Sidebar School Filter for Course Catalog
+        document.addEventListener("DOMContentLoaded", function() {
+            const schoolFilterButtons = document.querySelectorAll('#schoolFilter button');
+            const courseRows = document.querySelectorAll('#coursesTable tbody tr.course-row');
+            const noCoursesRow = document.getElementById('noCoursesRow');
+            const noFilteredCoursesRow = document.getElementById('noFilteredCoursesRow');
+            
+            schoolFilterButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active state
+                    schoolFilterButtons.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    const schoolId = this.getAttribute('data-school-id');
+                    let visibleCount = 0;
+                    
+                    // Filter rows
+                    courseRows.forEach(row => {
+                        if (schoolId === 'all' || row.getAttribute('data-course-school-id') === schoolId) {
+                            row.style.display = '';
+                            visibleCount++;
+                        } else {
+                            row.style.display = 'none';
+                        }
+                    });
+
+                    // Handle empty state
+                    if (courseRows.length > 0) {
+                        if (visibleCount === 0) {
+                            noFilteredCoursesRow.style.display = '';
+                        } else {
+                            noFilteredCoursesRow.style.display = 'none';
+                        }
+                    }
+                });
+            });
         });
     </script>
 </body>

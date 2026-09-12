@@ -6,11 +6,7 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Course {
+public class School {
     private int id;
-    private String courseCode;
-    private String courseTitle;
-    private int credits = 3;
-    private int schoolId;
     private String schoolName;
 }

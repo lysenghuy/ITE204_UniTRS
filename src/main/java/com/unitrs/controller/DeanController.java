@@ -29,7 +29,8 @@ public class DeanController extends HttpServlet {
             new TermRepository(), 
             new com.unitrs.repository.UserRepository(), 
             new com.unitrs.repository.ClassSectionRepository(),
-            new com.unitrs.repository.RoomRepository()
+            new com.unitrs.repository.RoomRepository(),
+            new com.unitrs.repository.SchoolRepository()
         );
     }
 
@@ -52,6 +53,7 @@ public class DeanController extends HttpServlet {
         List<com.unitrs.model.entity.User> professors = deanService.getAllProfessors();
         List<com.unitrs.model.entity.ClassSection> sections = deanService.getAllClassSections();
         List<com.unitrs.model.entity.Room> rooms = deanService.getAllRooms();
+        List<com.unitrs.model.entity.School> schools = deanService.getAllSchools();
 
         request.setAttribute("courses", courses);
         request.setAttribute("terms", terms);
@@ -59,8 +61,8 @@ public class DeanController extends HttpServlet {
         request.setAttribute("professors", professors);
         request.setAttribute("sections", sections);
         request.setAttribute("rooms", rooms);
+        request.setAttribute("schools", schools);
 
-        // Retain the active tab state if provided (for returning after a form submission)
         String activeTab = request.getParameter("tab");
         if (activeTab == null) activeTab = "courses";
         request.setAttribute("activeTab", activeTab);
@@ -79,7 +81,8 @@ public class DeanController extends HttpServlet {
                 String code = request.getParameter("courseCode");
                 String title = request.getParameter("courseTitle");
                 int credits = Integer.parseInt(request.getParameter("credits"));
-                deanService.addCourse(code, title, credits);
+                int schoolId = Integer.parseInt(request.getParameter("schoolId"));
+                deanService.addCourse(code, title, credits, schoolId);
                 request.setAttribute("successMessage", "Course successfully added.");
 
             } else if ("updateCourse".equals(action)) {
@@ -88,7 +91,8 @@ public class DeanController extends HttpServlet {
                 String code = request.getParameter("courseCode");
                 String title = request.getParameter("courseTitle");
                 int credits = Integer.parseInt(request.getParameter("credits"));
-                deanService.updateCourse(id, code, title, credits);
+                int schoolId = Integer.parseInt(request.getParameter("schoolId"));
+                deanService.updateCourse(id, code, title, credits, schoolId);
                 request.setAttribute("successMessage", "Course successfully updated.");
 
             } else if ("addTerm".equals(action)) {

@@ -22,12 +22,20 @@ CREATE TABLE IF NOT EXISTS terms (
     term_name VARCHAR(50) NOT NULL               -- e.g. 'Term 5'
 );
 
--- 3. Courses Master Table
+-- 3. Academic Schools (Colleges)
+CREATE TABLE IF NOT EXISTS schools (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    school_name VARCHAR(100) NOT NULL UNIQUE
+);
+
+-- 4. Courses Master Table
 CREATE TABLE IF NOT EXISTS courses (
     id INT AUTO_INCREMENT PRIMARY KEY,
     course_code VARCHAR(20) NOT NULL UNIQUE,     -- e.g. 'ITE 204'
     course_title VARCHAR(150) NOT NULL,          -- e.g. 'Java Enterprise Edition'
-    credits INT DEFAULT 3
+    credits INT DEFAULT 3,
+    school_id INT NOT NULL,
+    FOREIGN KEY (school_id) REFERENCES schools(id) ON DELETE RESTRICT
 );
 
 -- 4. Term Course Bundles (Mapping courses belonging to a specific term)
@@ -96,12 +104,27 @@ INSERT IGNORE INTO terms (term_number, term_name) VALUES
 (1, 'Term 1'), (2, 'Term 2'), (3, 'Term 3'), (4, 'Term 4'),
 (5, 'Term 5'), (6, 'Term 6'), (7, 'Term 7'), (8, 'Term 8');
 
+-- Seed Initial Schools
+INSERT IGNORE INTO schools (school_name) VALUES
+('School of Undergraduate Studies'),
+('School of Graduate Studies'),
+('College of Arts and Humanities'),
+('College of Education'),
+('College of Law'),
+('College of Media and Communications'),
+('College of Science and Technology'),
+('College of Social Sciences'),
+('School of Creative Arts'),
+('School of Foreign Languages'),
+('The Techo Sen School of Government and International Relations'),
+('School of Business');
+
 -- Seed Initial Courses
-INSERT IGNORE INTO courses (course_code, course_title, credits) VALUES
-('ITE 204', 'Java Enterprise Edition', 3),
-('ITE 205', 'Database Systems Administration', 3),
-('ITE 206', 'Computer Networks', 3),
-('ENG 201', 'Advanced Academic English', 3);
+INSERT IGNORE INTO courses (course_code, course_title, credits, school_id) VALUES
+('ITE 204', 'Java Enterprise Edition', 3, 7),
+('ITE 205', 'Database Systems Administration', 3, 7),
+('ITE 206', 'Computer Networks', 3, 7),
+('ENG 201', 'Advanced Academic English', 3, 10);
 
 -- Seed Initial Staff Roles (Verified staff accounts)
 -- Passwords are BCrypt-hashed: admin123, dean123, prof123

@@ -18,17 +18,20 @@ public class DeanServiceImpl implements DeanService {
     private final com.unitrs.repository.UserRepository userRepository;
     private final com.unitrs.repository.ClassSectionRepository classSectionRepository;
     private final com.unitrs.repository.RoomRepository roomRepository;
+    private final com.unitrs.repository.SchoolRepository schoolRepository;
 
     public DeanServiceImpl(CourseRepository courseRepository, 
                            TermRepository termRepository, 
                            com.unitrs.repository.UserRepository userRepository, 
                            com.unitrs.repository.ClassSectionRepository classSectionRepository,
-                           com.unitrs.repository.RoomRepository roomRepository) {
+                           com.unitrs.repository.RoomRepository roomRepository,
+                           com.unitrs.repository.SchoolRepository schoolRepository) {
         this.courseRepository = courseRepository;
         this.termRepository = termRepository;
         this.userRepository = userRepository;
         this.classSectionRepository = classSectionRepository;
         this.roomRepository = roomRepository;
+        this.schoolRepository = schoolRepository;
     }
 
     @Override
@@ -42,7 +45,12 @@ public class DeanServiceImpl implements DeanService {
     }
 
     @Override
-    public void addCourse(String courseCode, String courseTitle, int credits) {
+    public List<com.unitrs.model.entity.School> getAllSchools() {
+        return schoolRepository.findAll();
+    }
+
+    @Override
+    public void addCourse(String courseCode, String courseTitle, int credits, int schoolId) {
         if (courseCode == null || courseCode.trim().isEmpty()) {
             throw new ValidationException("Course Code cannot be empty.");
         }
@@ -51,6 +59,9 @@ public class DeanServiceImpl implements DeanService {
         }
         if (credits <= 0) {
             throw new ValidationException("Credits must be a positive number.");
+        }
+        if (schoolId <= 0) {
+            throw new ValidationException("School must be selected.");
         }
         
         Course existing = courseRepository.findByCode(courseCode.trim());
@@ -62,6 +73,7 @@ public class DeanServiceImpl implements DeanService {
         course.setCourseCode(courseCode.trim().toUpperCase());
         course.setCourseTitle(courseTitle.trim());
         course.setCredits(credits);
+        course.setSchoolId(schoolId);
 
         if (!courseRepository.save(course)) {
             throw new RuntimeException("Failed to save course.");
@@ -69,10 +81,13 @@ public class DeanServiceImpl implements DeanService {
     }
 
     @Override
-    public void updateCourse(int id, String courseCode, String courseTitle, int credits) {
+    public void updateCourse(int id, String courseCode, String courseTitle, int credits, int schoolId) {
         Course course = courseRepository.findById(id);
         if (course == null) {
             throw new ValidationException("Course not found.");
+        }
+        if (schoolId <= 0) {
+            throw new ValidationException("School must be selected.");
         }
         
         Course existing = courseRepository.findByCode(courseCode.trim());
@@ -83,6 +98,7 @@ public class DeanServiceImpl implements DeanService {
         course.setCourseCode(courseCode.trim().toUpperCase());
         course.setCourseTitle(courseTitle.trim());
         course.setCredits(credits);
+        course.setSchoolId(schoolId);
 
         if (!courseRepository.update(course)) {
             throw new RuntimeException("Failed to update course.");

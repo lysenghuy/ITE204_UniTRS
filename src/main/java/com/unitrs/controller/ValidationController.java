@@ -19,7 +19,7 @@ public class ValidationController extends HttpServlet {
     private UserService userService;
     private final Map<String, long[]> rateLimiter = new ConcurrentHashMap<>();
     private static final int MAX_REQUESTS = 60;
-    private static final long TIME_WINDOW_MS = 60000; // 1 minute
+    private static final long TIME_WINDOW_MS = 60000;
 
     @Override
     public void init() throws ServletException {
