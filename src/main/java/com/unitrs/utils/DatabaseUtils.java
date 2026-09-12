@@ -39,21 +39,21 @@ public class DatabaseUtils {
             try {
                 rs.close();
             } catch (SQLException e) {
-                // Ignore or log
+
             }
         }
         if (stmt != null) {
             try {
                 stmt.close();
             } catch (SQLException e) {
-                // Ignore or log
+
             }
         }
         if (conn != null) {
             try {
                 conn.close();
             } catch (SQLException e) {
-                // Ignore or log
+
             }
         }
     }

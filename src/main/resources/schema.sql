@@ -95,7 +95,28 @@ CREATE TABLE IF NOT EXISTS enrollments (
     INDEX idx_enrollments_class_section_id (class_section_id)
 );
 
--- 7. Assessment & Grades Table
+-- 7. Attendance Records Table
+CREATE TABLE IF NOT EXISTS attendance_records (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    class_section_id INT NOT NULL,
+    session_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uq_section_date (class_section_id, session_date),
+    FOREIGN KEY (class_section_id) REFERENCES class_sections(id) ON DELETE CASCADE
+);
+
+-- 8. Attendance Entries Table (Individual student attendance)
+CREATE TABLE IF NOT EXISTS attendance_entries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    attendance_record_id INT NOT NULL,
+    student_id INT NOT NULL,
+    status ENUM('PRESENT', 'ABSENT', 'LATE', 'EXCUSED') NOT NULL,
+    FOREIGN KEY (attendance_record_id) REFERENCES attendance_records(id) ON DELETE CASCADE,
+    FOREIGN KEY (student_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE KEY uq_record_student (attendance_record_id, student_id)
+);
+
+-- 9. Assessment & Grades Table
 CREATE TABLE IF NOT EXISTS grades (
     id INT AUTO_INCREMENT PRIMARY KEY,
     enrollment_id INT NOT NULL UNIQUE,

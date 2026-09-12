@@ -24,7 +24,6 @@ public class CredentialsLoader {
             LOGGER.log(Level.WARNING, "Unable to load properties file", e);
         }
 
-        // Override with Environment Variables if present (For Docker/Cloud Deployment)
         if (System.getenv("DB_URL") != null) {
             properties.setProperty("db.url", System.getenv("DB_URL"));
         }
@@ -34,7 +33,7 @@ public class CredentialsLoader {
         if (System.getenv("DB_PASSWORD") != null) {
             properties.setProperty("db.password", System.getenv("DB_PASSWORD"));
         }
-        
+
         if (!properties.containsKey("db.url")) {
              throw new RuntimeException("No Database Configuration Found. Set DB_URL or provide db.properties");
         }

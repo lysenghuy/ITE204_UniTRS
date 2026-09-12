@@ -91,7 +91,7 @@ public class AdminController extends HttpServlet {
 
     private void showDeans(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         com.unitrs.service.DeanService deanService = new com.unitrs.service.impl.DeanServiceImpl(
                 new com.unitrs.repository.CourseRepository(),
                 new com.unitrs.repository.TermRepository(),
@@ -103,8 +103,7 @@ public class AdminController extends HttpServlet {
 
         List<com.unitrs.model.entity.School> schools = deanService.getAllSchools();
         List<User> professors = userService.findProfessors();
-        
-        // Find which professor is the dean for each school
+
         java.util.Map<Integer, User> currentDeans = new java.util.HashMap<>();
         for (User prof : professors) {
             if (prof.getDeanSchoolId() != null) {
@@ -121,26 +120,24 @@ public class AdminController extends HttpServlet {
 
     private void handleAssignDean(HttpServletRequest request, HttpServletResponse response)
             throws IOException {
-        
+
         int schoolId = Integer.parseInt(request.getParameter("schoolId"));
         String professorIdStr = request.getParameter("professorId");
-        
+
         UserRepository userRepo = new UserRepository();
-        
-        // If there was an existing dean for this school, we need to unassign them first
+
         List<User> professors = userService.findProfessors();
         for (User prof : professors) {
             if (prof.getDeanSchoolId() != null && prof.getDeanSchoolId() == schoolId) {
                 userRepo.assignDeanToSchool(prof.getId(), null);
             }
         }
-        
-        // Assign the new dean, if one was selected
+
         if (professorIdStr != null && !professorIdStr.isEmpty()) {
             int professorId = Integer.parseInt(professorIdStr);
             userRepo.assignDeanToSchool(professorId, schoolId);
         }
-        
+
         response.sendRedirect(request.getContextPath() + "/admin/deans");
     }
 
