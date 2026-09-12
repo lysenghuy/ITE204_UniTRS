@@ -35,7 +35,7 @@ public class ValidationController extends HttpServlet {
 
         String clientIp = request.getRemoteAddr();
         if (isRateLimited(clientIp)) {
-            response.setStatus(429); // Too Many Requests
+            response.setStatus(429);
             response.getWriter().write("{\"error\": \"Rate limit exceeded. Please try again later.\"}");
             return;
         }
@@ -72,7 +72,7 @@ public class ValidationController extends HttpServlet {
 
         synchronized (data) {
             if (currentTime - data[0] > TIME_WINDOW_MS) {
-                // Reset window
+
                 data[0] = currentTime;
                 data[1] = 1;
                 return false;

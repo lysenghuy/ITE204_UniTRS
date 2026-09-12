@@ -20,9 +20,9 @@ public class DeanServiceImpl implements DeanService {
     private final com.unitrs.repository.RoomRepository roomRepository;
     private final com.unitrs.repository.SchoolRepository schoolRepository;
 
-    public DeanServiceImpl(CourseRepository courseRepository, 
-                           TermRepository termRepository, 
-                           com.unitrs.repository.UserRepository userRepository, 
+    public DeanServiceImpl(CourseRepository courseRepository,
+                           TermRepository termRepository,
+                           com.unitrs.repository.UserRepository userRepository,
                            com.unitrs.repository.ClassSectionRepository classSectionRepository,
                            com.unitrs.repository.RoomRepository roomRepository,
                            com.unitrs.repository.SchoolRepository schoolRepository) {
@@ -34,7 +34,6 @@ public class DeanServiceImpl implements DeanService {
         this.schoolRepository = schoolRepository;
     }
 
-    // --- Course Management ---
     @Override
     public List<Course> getAllCourses(int schoolId) {
         return courseRepository.findBySchoolId(schoolId);
@@ -69,7 +68,7 @@ public class DeanServiceImpl implements DeanService {
         if (schoolId <= 0) {
             throw new ValidationException("School must be selected.");
         }
-        
+
         Course existing = courseRepository.findByCode(courseCode.trim());
         if (existing != null) {
             throw new ValidationException("A course with code " + courseCode + " already exists.");
@@ -95,7 +94,7 @@ public class DeanServiceImpl implements DeanService {
         if (schoolId <= 0) {
             throw new ValidationException("School must be selected.");
         }
-        
+
         Course existing = courseRepository.findByCode(courseCode.trim());
         if (existing != null && existing.getId() != id) {
             throw new ValidationException("Another course with code " + courseCode + " already exists.");
@@ -170,8 +169,7 @@ public class DeanServiceImpl implements DeanService {
         if (currentCourses.size() >= 5) {
             throw new ValidationException("A term can only have a maximum of 5 courses bundled.");
         }
-        
-        // Will silently ignore if already assigned due to INSERT IGNORE in repository
+
         termRepository.assignCourseToTerm(termId, courseId);
     }
 
@@ -184,18 +182,17 @@ public class DeanServiceImpl implements DeanService {
     public Map<Term, List<Course>> getTermCurriculumMap(int schoolId) {
         List<Term> terms = termRepository.findAll();
         Map<Term, List<Course>> map = new LinkedHashMap<>();
-        
+
         for (Term term : terms) {
             List<Course> courses = termRepository.findCoursesByTerm(term.getId());
-            // Filter courses to only include those belonging to the dean's school
+
             courses.removeIf(c -> c.getSchoolId() != schoolId);
             map.put(term, courses);
         }
-        
+
         return map;
     }
 
-    // --- Faculty, Students & Scheduling ---
     @Override
     public List<com.unitrs.model.entity.User> getAllProfessors() {
         return userRepository.findProfessors();
@@ -220,51 +217,46 @@ public class DeanServiceImpl implements DeanService {
             throw new ValidationException("Academic Year cannot be empty.");
         }
 
-        // Verify that the course is actually assigned to the term!
         List<Course> coursesInTerm = termRepository.findCoursesByTerm(termId);
         boolean courseAssigned = coursesInTerm.stream().anyMatch(c -> c.getId() == courseId);
         if (!courseAssigned) {
             throw new ValidationException("Cannot schedule: This course is not bundled into the selected term.");
         }
 
-        // Auto-Calculate Exact Days based on Bundle Size
         String exactDays = daysOfWeek.trim();
         List<com.unitrs.model.entity.ClassSection> allSections = classSectionRepository.findAllSections();
-        
+
         if ("Mon-Fri".equalsIgnoreCase(exactDays)) {
             int totalCourses = coursesInTerm.size();
-            
-            // Find how many courses are already scheduled for this Term, Shift, and Academic Year
+
             long scheduledCount = allSections.stream()
-                .filter(s -> s.getTermId() == termId 
+                .filter(s -> s.getTermId() == termId
                           && s.getSessionShift().name().equals(sessionShift)
                           && s.getAcademicYear().equals(academicYear.trim()))
                 .count();
-                
+
             int slotIndex = (int) scheduledCount;
             exactDays = calculateMonFriDays(totalCourses, slotIndex);
         }
 
-        // Double-Booking Validation (Professor)
         for (com.unitrs.model.entity.ClassSection existing : allSections) {
-            if (existing.getProfessorId() == professorId && 
+            if (existing.getProfessorId() == professorId &&
                 existing.getAcademicYear().equals(academicYear.trim()) &&
                 existing.getTermId() == termId &&
                 existing.getSessionShift().name().equals(sessionShift)) {
-                
+
                 if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
                     throw new ValidationException("Professor is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
                 }
             }
         }
 
-        // Double-Booking Validation (Room) - optional but good to have
         for (com.unitrs.model.entity.ClassSection existing : allSections) {
-            if (existing.getRoomId() == roomId && 
+            if (existing.getRoomId() == roomId &&
                 existing.getAcademicYear().equals(academicYear.trim()) &&
                 existing.getTermId() == termId &&
                 existing.getSessionShift().name().equals(sessionShift)) {
-                
+
                 if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
                     throw new ValidationException("Room is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
                 }
@@ -308,8 +300,8 @@ public class DeanServiceImpl implements DeanService {
 
     private String calculateMonFriDays(int totalCourses, int slotIndex) {
         if (totalCourses <= 0) return "Mon-Fri";
-        if (slotIndex >= totalCourses) slotIndex = totalCourses - 1; // Safety fallback
-        
+        if (slotIndex >= totalCourses) slotIndex = totalCourses - 1;
+
         if (totalCourses >= 5) {
             String[] days = {"Mon", "Tue", "Wed", "Thu", "Fri"};
             return slotIndex < 5 ? days[slotIndex] : "Fri";
@@ -334,7 +326,6 @@ public class DeanServiceImpl implements DeanService {
         }
     }
 
-    // --- Facilities & Rooms ---
     @Override
     public List<com.unitrs.model.entity.Room> getAllRooms() {
         return roomRepository.findAllRooms();
@@ -348,7 +339,7 @@ public class DeanServiceImpl implements DeanService {
         if (capacity <= 0) {
             throw new ValidationException("Capacity must be greater than 0.");
         }
-        
+
         com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumber.trim());
         if (existing != null) {
             throw new ValidationException("Room " + roomNumber + " already exists.");
@@ -372,13 +363,11 @@ public class DeanServiceImpl implements DeanService {
         if (capacityPerRoom <= 0) {
             throw new ValidationException("Capacity must be positive.");
         }
-        
-        // Find a starting index for the room numbers on this floor
-        // Simplistic approach: Generate Room X01, X02 based on floor X
+
         int baseRoomNumber = floorNumber * 100;
         int roomsCreated = 0;
         int i = 1;
-        
+
         while (roomsCreated < numberOfRooms) {
             String roomNumStr = "Room " + (baseRoomNumber + i);
             com.unitrs.model.entity.Room existing = roomRepository.findByNumber(roomNumStr);
@@ -391,7 +380,7 @@ public class DeanServiceImpl implements DeanService {
                 roomsCreated++;
             }
             i++;
-            if (i > 1000) break; // safety breakout
+            if (i > 1000) break;
         }
     }
 

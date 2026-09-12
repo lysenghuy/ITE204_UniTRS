@@ -9,14 +9,12 @@ public class AttendanceRecord {
     private int classSectionId;
     private Date sessionDate;
     private Timestamp createdAt;
-    
-    // Aggregation field (not mapped strictly to table column, used for UI)
+
     private int presentCount;
     private int absentCount;
     private int lateCount;
     private int excusedCount;
 
-    // Optional list to hold entries for a given record
     private List<AttendanceEntry> entries;
 
     public int getId() { return id; }

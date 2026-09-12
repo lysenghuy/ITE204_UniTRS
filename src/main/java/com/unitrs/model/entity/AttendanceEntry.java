@@ -4,9 +4,8 @@ public class AttendanceEntry {
     private int id;
     private int attendanceRecordId;
     private int studentId;
-    private String status; // 'PRESENT', 'ABSENT', 'LATE', 'EXCUSED'
+    private String status;
 
-    // Optional field for joining data
     private String studentName;
     private String studentIdentifier;
 

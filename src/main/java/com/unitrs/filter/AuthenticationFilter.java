@@ -30,12 +30,10 @@ public class AuthenticationFilter implements Filter {
         HttpSession session = httpRequest.getSession(false);
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
 
-        // Smart Routing: If user is already logged in, redirect them to their dashboard
-        // if they try to access the landing page or auth pages.
         if (isLoggedIn && (path.equals("/") || path.equals("/index.jsp") || path.equals("/auth/login") || path.equals("/auth/register"))) {
             com.unitrs.model.entity.User userObj = (com.unitrs.model.entity.User) session.getAttribute("user");
             Role userRole = (Role) session.getAttribute("role");
-            
+
             if (userObj != null && userObj.getDeanSchoolId() != null) {
                 httpResponse.sendRedirect(contextPath + "/dean/dashboard");
                 return;
@@ -59,7 +57,6 @@ public class AuthenticationFilter implements Filter {
             }
         }
 
-        // Allow these paths without login for guests
         if (path.startsWith("/auth/")
                 || path.startsWith("/api/validate/")
                 || path.startsWith("/static/")
@@ -70,13 +67,11 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
-        // Check if user is logged in for protected paths
         if (!isLoggedIn) {
             httpResponse.sendRedirect(contextPath + "/auth/login");
             return;
         }
 
-        // Check role-based access
         Role userRole = (Role) session.getAttribute("role");
         com.unitrs.model.entity.User userObj = (com.unitrs.model.entity.User) session.getAttribute("user");
         boolean isAssignedDean = userObj != null && userObj.getDeanSchoolId() != null;
@@ -92,7 +87,7 @@ public class AuthenticationFilter implements Filter {
             return;
         }
         if (path.startsWith("/professor/") && userRole != Role.PROFESSOR && !isAssignedDean) {
-            // Also allow Deans (who used to be professors) to access the professor dashboard
+
             httpRequest.setAttribute("errorMessage", "Access denied. Professor privileges required.");
             httpRequest.getRequestDispatcher("/error.jsp").forward(request, response);
             return;
@@ -103,7 +98,6 @@ public class AuthenticationFilter implements Filter {
             return;
         }
 
-        // All good, continue
         chain.doFilter(request, response);
     }
 }

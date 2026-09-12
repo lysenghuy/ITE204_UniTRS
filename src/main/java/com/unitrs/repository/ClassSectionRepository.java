@@ -51,13 +51,13 @@ public class ClassSectionRepository extends BaseRepository {
     public boolean save(ClassSection section) {
         String sql = "INSERT INTO class_sections (term_id, course_id, professor_id, room_id, session_shift, days_of_week, academic_year) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";
-        return executeUpdate(sql, 
-                section.getTermId(), 
-                section.getCourseId(), 
-                section.getProfessorId(), 
+        return executeUpdate(sql,
+                section.getTermId(),
+                section.getCourseId(),
+                section.getProfessorId(),
                 section.getRoomId(),
-                section.getSessionShift().name(), 
-                section.getDaysOfWeek(), 
+                section.getSessionShift().name(),
+                section.getDaysOfWeek(),
                 section.getAcademicYear()) > 0;
     }
 
@@ -76,8 +76,7 @@ public class ClassSectionRepository extends BaseRepository {
         section.setSessionShift(SessionShift.valueOf(rs.getString("session_shift")));
         section.setDaysOfWeek(rs.getString("days_of_week"));
         section.setAcademicYear(rs.getString("academic_year"));
-        
-        // Joined fields
+
         section.setCourseCode(rs.getString("course_code"));
         section.setCourseTitle(rs.getString("course_title"));
         section.setCredits(rs.getInt("credits"));
@@ -86,7 +85,7 @@ public class ClassSectionRepository extends BaseRepository {
         section.setRoomName(rs.getString("room_number"));
         section.setRoomCapacity(rs.getInt("room_capacity"));
         section.setEnrolledCount(rs.getInt("enrolled_count"));
-        
+
         return section;
     }
 }

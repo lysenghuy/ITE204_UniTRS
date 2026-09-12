@@ -102,7 +102,6 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Please fill in all required fields.");
         }
 
-        // 1. Identifier Validation
         identifier = identifier.trim();
         if (!identifier.matches("^[A-Za-z0-9._-]{3,30}$")) {
             throw new ValidationException("Identifier must be 3-30 characters long and contain only letters, numbers, dots, hyphens, and underscores.");
@@ -126,7 +125,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 2. Full Name Validation
         fullName = fullName.trim().replaceAll("\\s+", " ");
         if (fullName.length() < 2 || fullName.length() > 100) {
             throw new ValidationException("Full name must be between 2 and 100 characters.");
@@ -141,7 +139,6 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Please provide both first and last name (separated by space).");
         }
 
-        // 3. Email Validation
         email = email.trim().toLowerCase();
         if (email.length() > 64) {
             throw new ValidationException("Email address must not exceed 64 characters.");
@@ -153,7 +150,6 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Email must be a @gmail.com or an .edu domain.");
         }
 
-        // 4. Password Validation
         if (!password.equals(confirmPassword)) {
             throw new ValidationException("Passwords do not match.");
         }
@@ -176,7 +172,6 @@ public class UserServiceImpl implements UserService {
             throw new ValidationException("Password must contain at least one special character.");
         }
 
-        // 5. Major Validation (if provided)
         if (major != null) {
             major = major.trim();
             if (major.length() > 100) {
@@ -184,7 +179,6 @@ public class UserServiceImpl implements UserService {
             }
         }
 
-        // 6. Uniqueness Checks
         if (!isIdentifierAvailable(identifier)) {
             throw new ValidationException("User with this identifier already exists.");
         }
@@ -196,9 +190,9 @@ public class UserServiceImpl implements UserService {
         newUser.setUserIdentifier(identifier);
         newUser.setFullName(fullName);
         newUser.setEmail(email);
-        newUser.setPassword(password); 
+        newUser.setPassword(password);
         newUser.setMajor(major != null && !major.isEmpty() ? major : null);
-        newUser.setRole(com.unitrs.model.entity.Role.STUDENT); 
+        newUser.setRole(com.unitrs.model.entity.Role.STUDENT);
         newUser.setVerified(false);
         newUser.setActive(true);
 

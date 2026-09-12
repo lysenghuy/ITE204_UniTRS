@@ -33,8 +33,6 @@ public class TermRepository extends BaseRepository {
         return executeUpdate(sql, term.getTermNumber(), term.getTermName(), term.getId()) > 0;
     }
 
-    // --- Term-Course Bundling Logic ---
-
     public boolean assignCourseToTerm(int termId, int courseId) {
         String sql = "INSERT IGNORE INTO term_courses (term_id, course_id) VALUES (?, ?)";
         return executeUpdate(sql, termId, courseId) > 0;

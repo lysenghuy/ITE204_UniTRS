@@ -29,6 +29,39 @@ public class GradeRepository extends BaseRepository {
         return executeQuery(sql, this::mapResultSetToGrade, classSectionId);
     }
 
+    public List<Grade> findGradesByStudentId(int studentId) {
+        String sql = "SELECT " +
+                     "e.id AS enrollment_id, " +
+                     "e.student_id, " +
+                     "u.user_identifier AS student_identifier, " +
+                     "u.full_name AS student_name, " +
+                     "COALESCE(g.attendance_score, 0.00) AS attendance_score, " +
+                     "COALESCE(g.assignment_score, 0.00) AS assignment_score, " +
+                     "COALESCE(g.midterm_score, 0.00) AS midterm_score, " +
+                     "COALESCE(g.final_score, 0.00) AS final_score, " +
+                     "COALESCE(g.total_score, 0.00) AS total_score, " +
+                     "COALESCE(g.letter_grade, 'N/A') AS letter_grade, " +
+                     "COALESCE(g.gpa_point, 0.00) AS gpa_point, " +
+                     "c.course_code, c.course_title, c.credits, t.term_name " +
+                     "FROM enrollments e " +
+                     "JOIN users u ON e.student_id = u.id " +
+                     "JOIN class_sections cs ON e.class_section_id = cs.id " +
+                     "JOIN courses c ON cs.course_id = c.id " +
+                     "JOIN terms t ON cs.term_id = t.id " +
+                     "LEFT JOIN grades g ON e.id = g.enrollment_id " +
+                     "WHERE e.student_id = ? " +
+                     "ORDER BY t.term_name DESC, c.course_code ASC";
+                     
+        return executeQuery(sql, rs -> {
+            Grade grade = mapResultSetToGrade(rs);
+            grade.setCourseCode(rs.getString("course_code"));
+            grade.setCourseTitle(rs.getString("course_title"));
+            grade.setCredits(rs.getInt("credits"));
+            grade.setTermName(rs.getString("term_name"));
+            return grade;
+        }, studentId);
+    }
+
     public boolean saveGrade(int enrollmentId, double attendanceScore, double assignmentScore, 
                              double midtermScore, double finalScore, double totalScore, 
                              String letterGrade, double gpaPoint) {

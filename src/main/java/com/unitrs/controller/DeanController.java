@@ -25,9 +25,9 @@ public class DeanController extends HttpServlet {
     @Override
     public void init() throws ServletException {
         this.deanService = new DeanServiceImpl(
-            new CourseRepository(), 
-            new TermRepository(), 
-            new com.unitrs.repository.UserRepository(), 
+            new CourseRepository(),
+            new TermRepository(),
+            new com.unitrs.repository.UserRepository(),
             new com.unitrs.repository.ClassSectionRepository(),
             new com.unitrs.repository.RoomRepository(),
             new com.unitrs.repository.SchoolRepository()
@@ -54,7 +54,6 @@ public class DeanController extends HttpServlet {
         int deanSchoolId = user.getDeanSchoolId();
         com.unitrs.model.entity.School deanSchool = deanService.getSchoolById(deanSchoolId);
 
-        // Load data for the dashboard tabs
         List<Course> courses = deanService.getAllCourses(deanSchoolId);
         List<Term> terms = deanService.getAllTerms();
         Map<Term, List<Course>> curriculumMap = deanService.getTermCurriculumMap(deanSchoolId);
@@ -147,10 +146,10 @@ public class DeanController extends HttpServlet {
                 String sessionShift = request.getParameter("sessionShift");
                 String daysOfWeek = request.getParameter("daysOfWeek");
                 String academicYear = request.getParameter("academicYear");
-                
+
                 deanService.addClassSection(termId, courseId, professorId, roomId, sessionShift, daysOfWeek, academicYear);
                 request.setAttribute("successMessage", "Class Section successfully scheduled.");
-                
+
             } else if ("removeClassSection".equals(action)) {
                 activeTab = "schedules";
                 int id = Integer.parseInt(request.getParameter("sectionId"));
@@ -187,7 +186,6 @@ public class DeanController extends HttpServlet {
             request.setAttribute("errorMessage", "An unexpected error occurred: " + e.getMessage());
         }
 
-        // Instead of redirecting, forward to doGet to show the dashboard with the message and active tab
         request.setAttribute("tab", activeTab);
         showDashboard(request, response);
     }

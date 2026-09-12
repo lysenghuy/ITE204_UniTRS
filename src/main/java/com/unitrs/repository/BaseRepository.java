@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-// This repository is where you call of those call to the database , it to avoid writing bioplate code
-
 public abstract class BaseRepository {
 
     private static final Logger LOGGER = Logger.getLogger(BaseRepository.class.getName());
