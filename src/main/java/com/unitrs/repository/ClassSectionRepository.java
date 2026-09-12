@@ -34,6 +34,20 @@ public class ClassSectionRepository extends BaseRepository {
         return executeQueryForObject(sql, this::mapResultSetToClassSection, id);
     }
 
+    public List<ClassSection> findByProfessorId(int professorId) {
+        String sql = "SELECT cs.*, c.course_code, c.course_title, c.credits, u.full_name as professor_name, t.term_name, r.room_number, r.capacity as room_capacity, COUNT(e.id) as enrolled_count " +
+                     "FROM class_sections cs " +
+                     "JOIN courses c ON cs.course_id = c.id " +
+                     "JOIN users u ON cs.professor_id = u.id " +
+                     "JOIN terms t ON cs.term_id = t.id " +
+                     "JOIN rooms r ON cs.room_id = r.id " +
+                     "LEFT JOIN enrollments e ON cs.id = e.class_section_id " +
+                     "WHERE cs.professor_id = ? " +
+                     "GROUP BY cs.id " +
+                     "ORDER BY t.term_number ASC, c.course_code ASC";
+        return executeQuery(sql, this::mapResultSetToClassSection, professorId);
+    }
+
     public boolean save(ClassSection section) {
         String sql = "INSERT INTO class_sections (term_id, course_id, professor_id, room_id, session_shift, days_of_week, academic_year) " +
                      "VALUES (?, ?, ?, ?, ?, ?, ?)";

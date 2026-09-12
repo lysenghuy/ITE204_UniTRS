@@ -127,6 +127,14 @@ public class UserRepository extends BaseRepository {
         return executeQuery(sql, this::mapResultSetToUser, schoolId);
     }
 
+    public List<User> findStudentsByClassSection(int classSectionId) {
+        String sql = "SELECT u.* FROM users u " +
+                     "JOIN enrollments e ON u.id = e.student_id " +
+                     "WHERE e.class_section_id = ? " +
+                     "ORDER BY u.full_name ASC";
+        return executeQuery(sql, this::mapResultSetToUser, classSectionId);
+    }
+
     private User mapResultSetToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
