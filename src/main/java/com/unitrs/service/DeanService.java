@@ -8,7 +8,7 @@ import java.util.Map;
 public interface DeanService {
 
     // --- Course Management ---
-    List<Course> getAllCourses();
+    List<Course> getAllCourses(int schoolId);
 
     Course getCourseById(int id);
 
@@ -17,6 +17,8 @@ public interface DeanService {
     void updateCourse(int id, String courseCode, String courseTitle, int credits, int schoolId);
 
     List<com.unitrs.model.entity.School> getAllSchools();
+    
+    com.unitrs.model.entity.School getSchoolById(int id);
 
     // --- Term Management ---
     List<Term> getAllTerms();
@@ -34,10 +36,13 @@ public interface DeanService {
 
     // Returns a map where the key is the Term, and the value is a list of Courses
     // assigned to it.
-    Map<Term, List<Course>> getTermCurriculumMap();
+    // assigned to it, scoped to the dean's school.
+    Map<Term, List<Course>> getTermCurriculumMap(int schoolId);
 
-    // --- Faculty & Scheduling ---
+    // --- Faculty, Students & Scheduling ---
     List<com.unitrs.model.entity.User> getAllProfessors();
+    
+    List<com.unitrs.model.entity.User> getStudentsBySchool(int schoolId);
 
     List<com.unitrs.model.entity.ClassSection> getAllClassSections();
 

@@ -34,9 +34,10 @@ public class DeanServiceImpl implements DeanService {
         this.schoolRepository = schoolRepository;
     }
 
+    // --- Course Management ---
     @Override
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public List<Course> getAllCourses(int schoolId) {
+        return courseRepository.findBySchoolId(schoolId);
     }
 
     @Override
@@ -47,6 +48,11 @@ public class DeanServiceImpl implements DeanService {
     @Override
     public List<com.unitrs.model.entity.School> getAllSchools() {
         return schoolRepository.findAll();
+    }
+
+    @Override
+    public com.unitrs.model.entity.School getSchoolById(int id) {
+        return schoolRepository.findById(id);
     }
 
     @Override
@@ -175,22 +181,29 @@ public class DeanServiceImpl implements DeanService {
     }
 
     @Override
-    public Map<Term, List<Course>> getTermCurriculumMap() {
+    public Map<Term, List<Course>> getTermCurriculumMap(int schoolId) {
         List<Term> terms = termRepository.findAll();
         Map<Term, List<Course>> map = new LinkedHashMap<>();
         
         for (Term term : terms) {
             List<Course> courses = termRepository.findCoursesByTerm(term.getId());
+            // Filter courses to only include those belonging to the dean's school
+            courses.removeIf(c -> c.getSchoolId() != schoolId);
             map.put(term, courses);
         }
         
         return map;
     }
 
-    // --- Faculty & Scheduling ---
+    // --- Faculty, Students & Scheduling ---
     @Override
     public List<com.unitrs.model.entity.User> getAllProfessors() {
         return userRepository.findProfessors();
+    }
+
+    @Override
+    public List<com.unitrs.model.entity.User> getStudentsBySchool(int schoolId) {
+        return userRepository.findStudentsBySchool(schoolId);
     }
 
     @Override
@@ -216,11 +229,12 @@ public class DeanServiceImpl implements DeanService {
 
         // Auto-Calculate Exact Days based on Bundle Size
         String exactDays = daysOfWeek.trim();
+        List<com.unitrs.model.entity.ClassSection> allSections = classSectionRepository.findAllSections();
+        
         if ("Mon-Fri".equalsIgnoreCase(exactDays)) {
             int totalCourses = coursesInTerm.size();
             
             // Find how many courses are already scheduled for this Term, Shift, and Academic Year
-            List<com.unitrs.model.entity.ClassSection> allSections = classSectionRepository.findAllSections();
             long scheduledCount = allSections.stream()
                 .filter(s -> s.getTermId() == termId 
                           && s.getSessionShift().name().equals(sessionShift)
@@ -229,6 +243,32 @@ public class DeanServiceImpl implements DeanService {
                 
             int slotIndex = (int) scheduledCount;
             exactDays = calculateMonFriDays(totalCourses, slotIndex);
+        }
+
+        // Double-Booking Validation (Professor)
+        for (com.unitrs.model.entity.ClassSection existing : allSections) {
+            if (existing.getProfessorId() == professorId && 
+                existing.getAcademicYear().equals(academicYear.trim()) &&
+                existing.getTermId() == termId &&
+                existing.getSessionShift().name().equals(sessionShift)) {
+                
+                if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
+                    throw new ValidationException("Professor is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
+                }
+            }
+        }
+
+        // Double-Booking Validation (Room) - optional but good to have
+        for (com.unitrs.model.entity.ClassSection existing : allSections) {
+            if (existing.getRoomId() == roomId && 
+                existing.getAcademicYear().equals(academicYear.trim()) &&
+                existing.getTermId() == termId &&
+                existing.getSessionShift().name().equals(sessionShift)) {
+                
+                if (daysOverlap(existing.getDaysOfWeek(), exactDays)) {
+                    throw new ValidationException("Room is already booked for this time slot on overlapping days (" + existing.getDaysOfWeek() + ").");
+                }
+            }
         }
 
         com.unitrs.model.entity.ClassSection section = new com.unitrs.model.entity.ClassSection();
@@ -243,6 +283,27 @@ public class DeanServiceImpl implements DeanService {
         if (!classSectionRepository.save(section)) {
             throw new RuntimeException("Failed to save class section.");
         }
+    }
+
+    private boolean daysOverlap(String days1, String days2) {
+        String[] allDays = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+        for (String day : allDays) {
+            if (containsDay(days1, day) && containsDay(days2, day)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean containsDay(String daysString, String day) {
+        if (daysString == null) return false;
+        if (daysString.equalsIgnoreCase("Mon-Fri")) {
+            return day.equals("Mon") || day.equals("Tue") || day.equals("Wed") || day.equals("Thu") || day.equals("Fri");
+        }
+        if (daysString.equalsIgnoreCase("Sat-Sun")) {
+            return day.equals("Sat") || day.equals("Sun");
+        }
+        return daysString.contains(day);
     }
 
     private String calculateMonFriDays(int totalCourses, int slotIndex) {

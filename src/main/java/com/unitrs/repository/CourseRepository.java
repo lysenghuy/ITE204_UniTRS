@@ -12,6 +12,11 @@ public class CourseRepository extends BaseRepository {
         return executeQuery(sql, this::mapResultSetToCourse);
     }
 
+    public List<Course> findBySchoolId(int schoolId) {
+        String sql = "SELECT c.*, s.school_name FROM courses c LEFT JOIN schools s ON c.school_id = s.id WHERE c.school_id = ? ORDER BY c.course_code";
+        return executeQuery(sql, this::mapResultSetToCourse, schoolId);
+    }
+
     public Course findById(int id) {
         String sql = "SELECT c.*, s.school_name FROM courses c LEFT JOIN schools s ON c.school_id = s.id WHERE c.id = ?";
         return executeQueryForObject(sql, this::mapResultSetToCourse, id);

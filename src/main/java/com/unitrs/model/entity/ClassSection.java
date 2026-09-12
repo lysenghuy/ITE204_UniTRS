@@ -22,4 +22,5 @@ public class ClassSection {
     private String termName;
     private String roomName;
     private int roomCapacity;
+    private int enrolledCount;
 }

@@ -96,6 +96,9 @@
                 <a href="${pageContext.request.contextPath}/admin/users" class="btn btn-outline-primary me-2">
                     <i class="bi bi-people me-1"></i>Manage Users
                 </a>
+                <a href="${pageContext.request.contextPath}/admin/deans" class="btn btn-outline-success me-2">
+                    <i class="bi bi-building me-1"></i>Assign Deans
+                </a>
             </div>
         </div>
     </div>

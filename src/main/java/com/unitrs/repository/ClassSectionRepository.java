@@ -9,24 +9,28 @@ import java.util.List;
 public class ClassSectionRepository extends BaseRepository {
 
     public List<ClassSection> findAllSections() {
-        String sql = "SELECT cs.*, c.course_code, c.course_title, c.credits, u.full_name as professor_name, t.term_name, r.room_number, r.capacity as room_capacity " +
+        String sql = "SELECT cs.*, c.course_code, c.course_title, c.credits, u.full_name as professor_name, t.term_name, r.room_number, r.capacity as room_capacity, COUNT(e.id) as enrolled_count " +
                      "FROM class_sections cs " +
                      "JOIN courses c ON cs.course_id = c.id " +
                      "JOIN users u ON cs.professor_id = u.id " +
                      "JOIN terms t ON cs.term_id = t.id " +
                      "JOIN rooms r ON cs.room_id = r.id " +
+                     "LEFT JOIN enrollments e ON cs.id = e.class_section_id " +
+                     "GROUP BY cs.id " +
                      "ORDER BY t.term_number ASC, c.course_code ASC";
         return executeQuery(sql, this::mapResultSetToClassSection);
     }
 
     public ClassSection findById(int id) {
-        String sql = "SELECT cs.*, c.course_code, c.course_title, c.credits, u.full_name as professor_name, t.term_name, r.room_number, r.capacity as room_capacity " +
+        String sql = "SELECT cs.*, c.course_code, c.course_title, c.credits, u.full_name as professor_name, t.term_name, r.room_number, r.capacity as room_capacity, COUNT(e.id) as enrolled_count " +
                      "FROM class_sections cs " +
                      "JOIN courses c ON cs.course_id = c.id " +
                      "JOIN users u ON cs.professor_id = u.id " +
                      "JOIN terms t ON cs.term_id = t.id " +
                      "JOIN rooms r ON cs.room_id = r.id " +
-                     "WHERE cs.id = ?";
+                     "LEFT JOIN enrollments e ON cs.id = e.class_section_id " +
+                     "WHERE cs.id = ? " +
+                     "GROUP BY cs.id";
         return executeQueryForObject(sql, this::mapResultSetToClassSection, id);
     }
 
@@ -67,6 +71,7 @@ public class ClassSectionRepository extends BaseRepository {
         section.setTermName(rs.getString("term_name"));
         section.setRoomName(rs.getString("room_number"));
         section.setRoomCapacity(rs.getInt("room_capacity"));
+        section.setEnrolledCount(rs.getInt("enrolled_count"));
         
         return section;
     }

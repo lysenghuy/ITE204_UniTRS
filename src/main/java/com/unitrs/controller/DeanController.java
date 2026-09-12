@@ -46,22 +46,31 @@ public class DeanController extends HttpServlet {
     }
 
     private void showDashboard(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        com.unitrs.model.entity.User user = (com.unitrs.model.entity.User) request.getSession().getAttribute("user");
+        if (user == null || user.getDeanSchoolId() == null) {
+            response.sendRedirect(request.getContextPath() + "/auth/login");
+            return;
+        }
+        int deanSchoolId = user.getDeanSchoolId();
+        com.unitrs.model.entity.School deanSchool = deanService.getSchoolById(deanSchoolId);
+
         // Load data for the dashboard tabs
-        List<Course> courses = deanService.getAllCourses();
+        List<Course> courses = deanService.getAllCourses(deanSchoolId);
         List<Term> terms = deanService.getAllTerms();
-        Map<Term, List<Course>> curriculumMap = deanService.getTermCurriculumMap();
+        Map<Term, List<Course>> curriculumMap = deanService.getTermCurriculumMap(deanSchoolId);
         List<com.unitrs.model.entity.User> professors = deanService.getAllProfessors();
+        List<com.unitrs.model.entity.User> students = deanService.getStudentsBySchool(deanSchoolId);
         List<com.unitrs.model.entity.ClassSection> sections = deanService.getAllClassSections();
         List<com.unitrs.model.entity.Room> rooms = deanService.getAllRooms();
-        List<com.unitrs.model.entity.School> schools = deanService.getAllSchools();
 
+        request.setAttribute("deanSchool", deanSchool);
         request.setAttribute("courses", courses);
         request.setAttribute("terms", terms);
         request.setAttribute("curriculumMap", curriculumMap);
         request.setAttribute("professors", professors);
+        request.setAttribute("students", students);
         request.setAttribute("sections", sections);
         request.setAttribute("rooms", rooms);
-        request.setAttribute("schools", schools);
 
         String activeTab = request.getParameter("tab");
         if (activeTab == null) activeTab = "courses";
@@ -76,13 +85,19 @@ public class DeanController extends HttpServlet {
         String activeTab = "courses";
 
         try {
+            com.unitrs.model.entity.User user = (com.unitrs.model.entity.User) request.getSession().getAttribute("user");
+            if (user == null || user.getDeanSchoolId() == null) {
+                response.sendRedirect(request.getContextPath() + "/auth/login");
+                return;
+            }
+            int deanSchoolId = user.getDeanSchoolId();
+
             if ("addCourse".equals(action)) {
                 activeTab = "courses";
                 String code = request.getParameter("courseCode");
                 String title = request.getParameter("courseTitle");
                 int credits = Integer.parseInt(request.getParameter("credits"));
-                int schoolId = Integer.parseInt(request.getParameter("schoolId"));
-                deanService.addCourse(code, title, credits, schoolId);
+                deanService.addCourse(code, title, credits, deanSchoolId);
                 request.setAttribute("successMessage", "Course successfully added.");
 
             } else if ("updateCourse".equals(action)) {
@@ -91,8 +106,7 @@ public class DeanController extends HttpServlet {
                 String code = request.getParameter("courseCode");
                 String title = request.getParameter("courseTitle");
                 int credits = Integer.parseInt(request.getParameter("credits"));
-                int schoolId = Integer.parseInt(request.getParameter("schoolId"));
-                deanService.updateCourse(id, code, title, credits, schoolId);
+                deanService.updateCourse(id, code, title, credits, deanSchoolId);
                 request.setAttribute("successMessage", "Course successfully updated.");
 
             } else if ("addTerm".equals(action)) {

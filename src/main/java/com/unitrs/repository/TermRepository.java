@@ -55,6 +55,7 @@ public class TermRepository extends BaseRepository {
             course.setCourseCode(rs.getString("course_code"));
             course.setCourseTitle(rs.getString("course_title"));
             course.setCredits(rs.getInt("credits"));
+            course.setSchoolId(rs.getInt("school_id"));
             return course;
         }, termId);
     }

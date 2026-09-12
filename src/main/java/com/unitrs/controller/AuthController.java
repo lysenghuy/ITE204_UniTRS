@@ -85,6 +85,13 @@ public class AuthController extends HttpServlet {
             session.setAttribute("role", user.getRole());
             session.setMaxInactiveInterval(30 * 60);
             String contextPath = request.getContextPath();
+            
+            // If they are assigned as a Dean to a school, prioritize Dean dashboard
+            if (user.getDeanSchoolId() != null) {
+                response.sendRedirect(contextPath + "/dean/dashboard");
+                return;
+            }
+
             switch (user.getRole()) {
                 case ADMIN:
                     response.sendRedirect(contextPath + "/admin/dashboard");

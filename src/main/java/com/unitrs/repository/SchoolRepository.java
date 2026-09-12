@@ -12,6 +12,11 @@ public class SchoolRepository extends BaseRepository {
         return executeQuery(sql, this::mapResultSetToSchool);
     }
 
+    public School findById(int id) {
+        String sql = "SELECT * FROM schools WHERE id = ?";
+        return executeQueryForObject(sql, this::mapResultSetToSchool, id);
+    }
+
     private School mapResultSetToSchool(ResultSet rs) throws SQLException {
         School school = new School();
         school.setId(rs.getInt("id"));

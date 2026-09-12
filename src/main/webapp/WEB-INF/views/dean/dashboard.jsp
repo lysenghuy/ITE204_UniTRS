@@ -23,11 +23,14 @@
     <header class="dashboard-header shadow-sm">
         <div class="container d-flex justify-content-between align-items-center">
             <div>
-                <h2 class="mb-1"><i class="bi bi-mortarboard me-2"></i>Dean Dashboard</h2>
+                <h2 class="mb-1"><i class="bi bi-mortarboard me-2"></i>Dean Dashboard - ${deanSchool.schoolName}</h2>
                 <p class="mb-0 text-white-50">Curriculum & Academic Management</p>
             </div>
             <div>
                 <span class="me-3"><i class="bi bi-person-circle me-1"></i> ${user.fullName}</span>
+                <c:if test="${user.role == 'PROFESSOR'}">
+                    <a href="${pageContext.request.contextPath}/professor/dashboard" class="btn btn-outline-info btn-sm me-2"><i class="bi bi-person-workspace"></i> Switch to Professor Dashboard</a>
+                </c:if>
                 <a href="${pageContext.request.contextPath}/auth/logout" class="btn btn-outline-light btn-sm"><i class="bi bi-box-arrow-right"></i> Logout</a>
             </div>
         </div>
@@ -58,6 +61,9 @@
                 <button class="nav-link ${activeTab == 'terms' ? 'active' : ''}" id="terms-tab" data-bs-toggle="tab" data-bs-target="#terms" type="button" role="tab"><i class="bi bi-calendar3 me-2"></i>Academic Terms</button>
             </li>
             <li class="nav-item" role="presentation">
+                <button class="nav-link ${activeTab == 'students' ? 'active' : ''}" id="students-tab" data-bs-toggle="tab" data-bs-target="#students" type="button" role="tab"><i class="bi bi-people me-2"></i>Students</button>
+            </li>
+            <li class="nav-item" role="presentation">
                 <button class="nav-link ${activeTab == 'bundles' ? 'active' : ''}" id="bundles-tab" data-bs-toggle="tab" data-bs-target="#bundles" type="button" role="tab"><i class="bi bi-collection me-2"></i>Curriculum Bundling</button>
             </li>
             <li class="nav-item" role="presentation">
@@ -74,26 +80,8 @@
             <!-- 1. Master Courses Tab -->
             <div class="tab-pane fade ${activeTab == 'courses' ? 'show active' : ''}" id="courses" role="tabpanel">
                 <div class="row">
-                    <!-- Sidebar: School Filter -->
-                    <div class="col-md-3 mb-4">
-                        <div class="card card-custom">
-                            <div class="card-header bg-white fw-bold py-3">
-                                <i class="bi bi-funnel me-2"></i>Filter by School
-                            </div>
-                            <div class="list-group list-group-flush" id="schoolFilter">
-                                <button type="button" class="list-group-item list-group-item-action active" data-school-id="all">
-                                    All Schools
-                                </button>
-                                <c:forEach var="school" items="${schools}">
-                                    <button type="button" class="list-group-item list-group-item-action" data-school-id="${school.id}">
-                                        ${school.schoolName}
-                                    </button>
-                                </c:forEach>
-                            </div>
-                        </div>
-                    </div>
                     <!-- Main Content: Course Catalog -->
-                    <div class="col-md-9">
+                    <div class="col-md-12">
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <h4 class="mb-0">Course Catalog</h4>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCourseModal"><i class="bi bi-plus-lg me-1"></i> Add Course</button>
@@ -114,7 +102,7 @@
                             </thead>
                             <tbody>
                                 <c:forEach var="course" items="${courses}">
-                                    <tr class="course-row" data-course-school-id="${course.schoolId}">
+                                    <tr class="course-row">
                                         <td>${course.id}</td>
                                         <td><span class="badge bg-secondary">${course.courseCode}</span></td>
                                         <td>${course.courseTitle}</td>
@@ -145,15 +133,6 @@
                                                         <input type="text" class="form-control" name="courseTitle" value="${course.courseTitle}" required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label class="form-label">School / College</label>
-                                                        <select name="schoolId" class="form-select" required>
-                                                            <option value="">-- Select School --</option>
-                                                            <c:forEach var="school" items="${schools}">
-                                                                <option value="${school.id}" ${course.schoolId == school.id ? 'selected' : ''}>${school.schoolName}</option>
-                                                            </c:forEach>
-                                                        </select>
-                                                    </div>
-                                                    <div class="mb-3">
                                                         <label class="form-label">Credits</label>
                                                         <input type="number" class="form-control" name="credits" value="${course.credits}" required min="1" max="10">
                                                     </div>
@@ -176,6 +155,66 @@
             </div> <!-- End Main Content -->
         </div> <!-- End Row -->
     </div> <!-- End Master Courses Tab -->
+
+            <!-- Students Tab -->
+            <div class="tab-pane fade ${activeTab == 'students' ? 'show active' : ''}" id="students" role="tabpanel">
+                <div class="row mb-3 align-items-center">
+                    <div class="col">
+                        <h4 class="mb-0">Students in ${deanSchool.schoolName}</h4>
+                        <p class="text-muted mb-0 small">List of all officially registered students in this school.</p>
+                    </div>
+                </div>
+
+                <div class="card card-custom">
+                    <div class="card-body p-0">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Student Name</th>
+                                    <th>Email</th>
+                                    <th>Major</th>
+                                    <th>Status</th>
+                                    <th>Account State</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <c:forEach var="student" items="${students}">
+                                    <tr>
+                                        <td><span class="badge bg-secondary">${student.userIdentifier}</span></td>
+                                        <td><strong>${student.fullName}</strong></td>
+                                        <td>${student.email}</td>
+                                        <td>${student.major}</td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${student.verified}">
+                                                    <span class="badge bg-success"><i class="bi bi-check-circle me-1"></i> Verified</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-warning text-dark"><i class="bi bi-hourglass me-1"></i> Pending</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                        <td>
+                                            <c:choose>
+                                                <c:when test="${student.active}">
+                                                    <span class="badge bg-primary">Active</span>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <span class="badge bg-danger">Disabled</span>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </td>
+                                    </tr>
+                                </c:forEach>
+                                <c:if test="${empty students}">
+                                    <tr><td colspan="6" class="text-center text-muted py-4">No students officially enrolled in this school.</td></tr>
+                                </c:if>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
             <!-- 2. Academic Terms Tab -->
             <div class="tab-pane fade ${activeTab == 'terms' ? 'show active' : ''}" id="terms" role="tabpanel">
@@ -337,7 +376,10 @@
             <!-- 4. Class Schedules Tab -->
             <div class="tab-pane fade ${activeTab == 'schedules' ? 'show active' : ''}" id="schedules" role="tabpanel">
                 <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h4 class="mb-0">Class Schedules & Faculty Assignment</h4>
+                    <div>
+                        <h4 class="mb-0">Class Schedules & Faculty Assignment</h4>
+                        <span class="badge bg-secondary mt-1">Total Eligible Students: ${students.size()}</span>
+                    </div>
                     <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scheduleClassModal"><i class="bi bi-plus-lg me-1"></i> Schedule Class</button>
                 </div>
 
@@ -350,7 +392,7 @@
                                     <th>Course</th>
                                     <th>Professor</th>
                                     <th>Schedule</th>
-                                    <th>Room</th>
+                                    <th>Room & Enrollment</th>
                                     <th class="text-end">Actions</th>
                                 </tr>
                             </thead>
@@ -364,7 +406,16 @@
                                             <span class="badge bg-light text-dark border">${section.sessionShift}</span><br>
                                             <small class="text-muted"><i class="bi bi-calendar-event me-1"></i>${section.daysOfWeek}</small>
                                         </td>
-                                        <td><i class="bi bi-door-open me-1"></i>${section.roomName} <br><small class="text-muted">Cap: ${section.roomCapacity}</small></td>
+                                        <td>
+                                            <i class="bi bi-door-open me-1"></i>${section.roomName}
+                                            <br>
+                                            <small class="text-muted">
+                                                Enrolled: <strong>${section.enrolledCount} / ${section.roomCapacity}</strong>
+                                            </small>
+                                            <div class="progress mt-1" style="height: 5px; width: 120px;">
+                                                <div class="progress-bar ${section.enrolledCount >= section.roomCapacity ? 'bg-danger' : 'bg-success'}" role="progressbar" style="width: ${section.roomCapacity > 0 ? (section.enrolledCount * 100 / section.roomCapacity) : 0}%"></div>
+                                            </div>
+                                        </td>
                                         <td class="text-end">
                                             <form action="${pageContext.request.contextPath}/dean/dashboard" method="post" style="display:inline;">
                                                 <input type="hidden" name="action" value="removeClassSection">
@@ -451,14 +502,6 @@
                         <label class="form-label">Course Title</label>
                         <input type="text" class="form-control" name="courseTitle" required>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label">School / College</label>
-                        <select name="schoolId" class="form-select" required>
-                            <option value="">-- Select School --</option>
-                            <c:forEach var="school" items="${schools}">
-                                <option value="${school.id}">${school.schoolName}</option>
-                            </c:forEach>
-                        </select>
                     </div>
                     <div class="mb-3">
                         <label class="form-label">Credits</label>
