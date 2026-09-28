@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -672,18 +673,26 @@
             }
         }
     </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/sonner.css">
 </head>
 <body>
 
-    <c:if test="${not empty successMessage}">
-        <div class="position-fixed top-0 start-50 translate-middle-x p-3" style="z-index: 99999;">
-            <div class="alert alert-success alert-dismissible fade show shadow-lg rounded-4 d-flex align-items-center gap-2 mb-0 py-2.5 px-4" role="alert" style="border: 1px solid #86efac; background: #f0fdf4; color: #166534;">
-                <i class="bi bi-check-circle-fill text-success fs-5"></i>
-                <div class="fw-bold small">${successMessage}</div>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" style="padding: 1rem;"></button>
-            </div>
-        </div>
+    <%-- SONNER TOAST NOTIFICATIONS --%>
+    <c:if test="${param.twoFactorUpdated == 'true'}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) is now enabled for your account."></div>
     </c:if>
+    <c:if test="${param.twoFactorUpdated == 'false'}">
+        <div class="sonner-flash-trigger d-none" data-type="info" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) has been disabled for your account."></div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Success" data-message="${fn:escapeXml(successMessage)}"></div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="error" data-title="Error" data-message="${fn:escapeXml(errorMessage)}"></div>
+    </c:if>
+
+
+    
 
     <div class="desktop-layout">
         <aside class="desktop-sidebar" role="complementary" aria-label="Admin Navigation">
@@ -1920,5 +1929,6 @@
             if (e.key === 'Escape') document.getElementById('logoutConfirmModal').style.display = 'none';
         });
     </script>
+    <script src="${pageContext.request.contextPath}/static/js/sonner.js"></script>
 </body>
 </html>

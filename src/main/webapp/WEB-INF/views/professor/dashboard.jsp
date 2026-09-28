@@ -857,8 +857,24 @@
             .grade-input-box input:focus { color: #2563eb; }
         }
     </style>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/sonner.css">
 </head>
 <body>
+
+    <%-- SONNER TOAST NOTIFICATIONS --%>
+    <c:if test="${param.twoFactorUpdated == 'true'}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) is now enabled for your account."></div>
+    </c:if>
+    <c:if test="${param.twoFactorUpdated == 'false'}">
+        <div class="sonner-flash-trigger d-none" data-type="info" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) has been disabled for your account."></div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Success" data-message="${fn:escapeXml(successMessage)}"></div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="error" data-title="Error" data-message="${fn:escapeXml(errorMessage)}"></div>
+    </c:if>
+
 <div class="d-none d-md-flex desktop-app-container">
     <style>
         body.modal-open {
@@ -2019,6 +2035,20 @@
             color: #ffffff;
             border-color: #0f172a;
         }
+
+        /* Responsive Desktop Breakpoints */
+        @media (min-width: 768px) and (max-width: 1199.98px) {
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            .middle-grid {
+                grid-template-columns: 1fr !important;
+            }
+            .desktop-sidebar {
+                width: 240px !important;
+                padding: 24px 16px !important;
+            }
+        }
     </style>
 
     <!-- Accessible Skip to Content Link -->
@@ -2070,7 +2100,7 @@
         <header class="desktop-header">
 
             <div class="header-actions">
-                <button type="button" class="btn btn-outline-light text-dark border bg-white rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
+                <button type="button" class="btn btn-outline-light text-dark border bg-white rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
                     <i class="bi bi-calendar-heart text-danger"></i>
                     <span class="small">Holidays</span>
                 </button>
@@ -2156,33 +2186,7 @@
             </div>
         </header>
 
-        <%-- ALERTS --%>
-        <div aria-live="polite">
-            <c:if test="${param.twoFactorUpdated == 'true'}">
-                <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
-                    <i class="bi bi-shield-check me-2" aria-hidden="true"></i>Two-Factor Authentication (2FA) is now <strong>enabled</strong> for your account.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </c:if>
-            <c:if test="${param.twoFactorUpdated == 'false'}">
-                <div class="alert alert-info alert-dismissible fade show rounded-4" role="alert">
-                    <i class="bi bi-shield-slash me-2" aria-hidden="true"></i>Two-Factor Authentication (2FA) has been <strong>disabled</strong> for your account.
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </c:if>
-            <c:if test="${not empty successMessage}">
-                <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
-                    <i class="bi bi-check-circle-fill me-2" aria-hidden="true"></i>${successMessage}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </c:if>
-            <c:if test="${not empty errorMessage}">
-                <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
-                    <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>${errorMessage}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </c:if>
-        </div>
+        
 
         <%-- Calculate total enrolled students --%>
         <c:set var="totalEnrolledCount" value="0" />
@@ -2389,7 +2393,7 @@
                                     <td><span class="tc-badge success"><i class="bi bi-people-fill me-1" aria-hidden="true"></i>${students.size()} Students</span></td>
                                     <td class="text-end pe-3">
                                         <div class="d-inline-flex align-items-center gap-1">
-                                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-none" data-bs-toggle="modal" data-bs-target="#attendanceModal${section.id}" title="Take Attendance">
+                                            <button type="button" class="btn btn-sm btn-primary rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-none" data-bs-toggle="modal" data-bs-target="#attendanceModal${section.id}" title="Take Attendance">
                                                 <i class="bi bi-clipboard-check"></i>
                                                 <span>Attendance</span>
                                             </button>
@@ -2555,7 +2559,7 @@
                     <p class="text-muted small mb-0">Overview of classroom allocations, schedule shifts, and lecture sessions</p>
                 </div>
                 <div class="d-flex align-items-center gap-3">
-                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
+                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-xs" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
                         <i class="bi bi-calendar-heart me-1"></i> School Holidays
                     </button>
                     <div class="view-toggle-group" role="group" aria-label="Schedule View Switcher">
@@ -2833,7 +2837,7 @@
                             <i class="bi bi-clock-history me-2 text-primary" aria-hidden="true"></i>Attendance History - ${section.courseCode}
                         </h5>
                         <div class="d-flex align-items-center gap-2">
-                            <a href="${pageContext.request.contextPath}/professor/attendance/export?classSectionId=${section.id}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" title="Export this section's attendance to Excel">
+                            <a href="${pageContext.request.contextPath}/professor/attendance/export?classSectionId=${section.id}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" title="Export this section's attendance to Excel">
                                 <i class="bi bi-file-earmark-excel-fill text-success" aria-hidden="true"></i>
                                 <span>Export Excel</span>
                             </a>
@@ -3055,8 +3059,8 @@
                                     <option value="" data-code="Class Link" data-title="General Class Link">General / Custom Class Link</option>
                                     <c:forEach var="entry" items="${sectionStudentsMap}">
                                         <c:set var="sec" value="${entry.key}" />
-                                        <option value="${sec.id}" data-code="<c:out value="${sec.courseCode}"/>" data-title="<c:out value="${sec.courseTitle}"/>">
-                                            <c:out value="${sec.courseCode}"/> — <c:out value="${sec.courseTitle}"/> (<c:out value="${sec.sessionShift}"/>)
+                                        <option value="${sec.id}" data-code="${sec.courseCode}" data-title="${fn:escapeXml(sec.courseTitle)}">
+                                            ${sec.courseCode} &mdash; ${fn:escapeXml(sec.courseTitle)} (${sec.sessionShift})
                                         </option>
                                     </c:forEach>
                                 </select>
@@ -3763,26 +3767,10 @@
 
 <div class="d-block d-md-none mobile-app-container">
 
-    <c:if test="${param.twoFactorUpdated == 'true'}">
-        <div class="alert alert-success alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small" role="alert">
-            <i class="bi bi-shield-check me-1"></i>2FA <strong>enabled</strong>.<button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
-    <c:if test="${param.twoFactorUpdated == 'false'}">
-        <div class="alert alert-info alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small" role="alert">
-            <i class="bi bi-shield-slash me-1"></i>2FA <strong>disabled</strong>.<button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
-    <c:if test="${not empty successMessage}">
-        <div class="alert alert-success alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small" role="alert">
-            <i class="bi bi-check-circle-fill me-1"></i>${successMessage}<button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
-    <c:if test="${not empty errorMessage}">
-        <div class="alert alert-danger alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-1"></i>${errorMessage}<button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-    </c:if>
+    
+    
+    
+    
     
     <header class="mobile-top-bar" role="banner">
         <div class="mobile-user-info">
@@ -3933,7 +3921,7 @@
             </div>
             <div class="d-flex align-items-center gap-2">
                 <c:if test="${not empty sectionStudentsMap}">
-                    <a href="${pageContext.request.contextPath}/professor/attendance/export" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" style="font-size:0.75rem;" title="Export all attendance">
+                    <a href="${pageContext.request.contextPath}/professor/attendance/export" class="btn btn-sm btn-outline-success rounded-pill px-3 py-2 fw-semibold d-inline-flex align-items-center gap-1 shadow-sm" style="font-size:0.75rem;" title="Export all attendance">
                         <i class="bi bi-file-earmark-excel-fill text-success"></i> Export All
                     </a>
                 </c:if>
@@ -4021,7 +4009,7 @@
                         <div class="small text-muted" style="font-size:0.72rem;">View upcoming breaks & observances</div>
                     </div>
                 </div>
-                <span class="badge bg-danger text-white rounded-pill px-2.5 py-1" style="font-size:0.68rem;">View</span>
+                <span class="badge bg-danger text-white rounded-pill px-2 py-1" style="font-size:0.68rem;">View</span>
             </div>
         </div>
 
@@ -5095,5 +5083,6 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') document.getElementById('logoutConfirmModal').style.display = 'none';
 });
 </script>
+    <script src="${pageContext.request.contextPath}/static/js/sonner.js"></script>
 </body>
 </html>

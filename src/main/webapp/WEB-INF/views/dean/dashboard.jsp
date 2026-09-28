@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
     <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
         <!DOCTYPE html>
         <html lang="en">
 
@@ -1251,9 +1252,25 @@
                     }
                 }
             </style>
-        </head>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/sonner.css">
+</head>
 
         <body>
+
+    <%-- SONNER TOAST NOTIFICATIONS --%>
+    <c:if test="${param.twoFactorUpdated == 'true'}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) is now enabled for your account."></div>
+    </c:if>
+    <c:if test="${param.twoFactorUpdated == 'false'}">
+        <div class="sonner-flash-trigger d-none" data-type="info" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) has been disabled for your account."></div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Success" data-message="${fn:escapeXml(successMessage)}"></div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="error" data-title="Error" data-message="${fn:escapeXml(errorMessage)}"></div>
+    </c:if>
+
 
             <div class="desktop-layout">
 
@@ -1480,39 +1497,7 @@
                             </div>
                         </header>
 
-                        <%-- ALERTS --%>
-                            <div aria-live="polite">
-                                <c:if test="${param.twoFactorUpdated == 'true'}">
-                                    <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
-                                        <i class="bi bi-shield-check me-2"></i>Two-Factor Authentication (2FA) is now
-                                        <strong>enabled</strong> for your account.
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                            aria-label="Close"></button>
-                                    </div>
-                                </c:if>
-                                <c:if test="${param.twoFactorUpdated == 'false'}">
-                                    <div class="alert alert-info alert-dismissible fade show rounded-4" role="alert">
-                                        <i class="bi bi-shield-slash me-2"></i>Two-Factor Authentication (2FA) has been
-                                        <strong>disabled</strong> for your account.
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                            aria-label="Close"></button>
-                                    </div>
-                                </c:if>
-                                <c:if test="${not empty successMessage}">
-                                    <div class="alert alert-success alert-dismissible fade show rounded-4" role="alert">
-                                        <i class="bi bi-check-circle-fill me-2"></i>${successMessage}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                            aria-label="Close"></button>
-                                    </div>
-                                </c:if>
-                                <c:if test="${not empty errorMessage}">
-                                    <div class="alert alert-danger alert-dismissible fade show rounded-4" role="alert">
-                                        <i class="bi bi-exclamation-triangle-fill me-2"></i>${errorMessage}
-                                        <button type="button" class="btn-close" data-bs-dismiss="alert"
-                                            aria-label="Close"></button>
-                                    </div>
-                                </c:if>
-                            </div>
+                        
 
                             <%-- TOP METRIC STATS CARDS --%>
                                 <div class="metrics-grid">
@@ -4217,6 +4202,7 @@
                                 if (e.key === 'Escape') document.getElementById('logoutConfirmModal').style.display = 'none';
                             });
                         </script>
-        </body>
+            <script src="${pageContext.request.contextPath}/static/js/sonner.js"></script>
+</body>
 
         </html>

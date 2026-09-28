@@ -643,17 +643,11 @@
             </span>
         </div>
 
-        <div class="alert alert-danger d-none" id="globalErrorAlert" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-            <span id="globalErrorText"></span>
-        </div>
+        
 
         <c:if test="${not empty error}">
             <div class="sonner-flash-trigger d-none" data-type="error" data-title="Registration Failed" data-message="<c:out value='${error}' />"></div>
-            <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="bi bi-exclamation-triangle-fill me-2"></i>${error}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
+            
         </c:if>
 
         <!-- STEP 1: ROLE SELECTION -->
@@ -1051,8 +1045,7 @@
     const confirmValidation = document.getElementById('confirmValidation');
 
     const submitBtn = document.getElementById('submitBtn');
-    const globalErrorAlert = document.getElementById('globalErrorAlert');
-    const globalErrorText = document.getElementById('globalErrorText');
+    
 
     function handleStudentCardClick() {
         flowState.role = 'student';
@@ -1364,14 +1357,10 @@
         if (window.Sonner) {
             Sonner.error(msg, 'Registration Error');
         }
-        globalErrorText.textContent = msg;
-        globalErrorAlert.classList.remove('d-none');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     function hideGlobalError() {
-        globalErrorAlert.classList.add('d-none');
-        globalErrorText.textContent = '';
+        // No-op for Sonner as it auto-dismisses
     }
 
     async function handleFormSubmit(e) {

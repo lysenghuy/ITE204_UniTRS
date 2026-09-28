@@ -24,18 +24,19 @@
                     background-color: #f6f8fb;
                 }
 
-                
+                /* Micro-shadow & Spacing Utility Polish */
+                .shadow-xs {
+                    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03) !important;
+                }
+                .py-1\.5 { padding-top: 0.375rem !important; padding-bottom: 0.375rem !important; }
+                .px-2\.5 { padding-left: 0.625rem !important; padding-right: 0.625rem !important; }
+                .py-2\.5 { padding-top: 0.625rem !important; padding-bottom: 0.625rem !important; }
+                .gap-1\.5 { gap: 0.375rem !important; }
+                .me-1\.5 { margin-right: 0.375rem !important; }
+                .mb-1\.5 { margin-bottom: 0.375rem !important; }
 
-                
-
-                
-
-                
-
-                
-
-                                    .grades-hero-card {
-                        background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+                .grades-hero-card {
+                    background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
                         border-radius: 24px;
                         padding: 24px 28px;
                         color: #fff;
@@ -146,6 +147,10 @@
                         margin-bottom: 2px;
                         line-height: 1.25;
                         letter-spacing: -0.02em;
+                        max-width: 180px;
+                        white-space: nowrap;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
                     }
 
                     .mobile-badge-pill {
@@ -214,6 +219,7 @@
                     }
 
                     .date-strip-item {
+                        position: relative;
                         flex: 0 0 58px;
                         min-height: 68px;
                         background: #ffffff;
@@ -246,8 +252,7 @@
                         background: #0f172a;
                         border-color: #0f172a;
                         color: #ffffff;
-                        box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.35);
-                        transform: translateY(-2px);
+                        box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.3);
                     }
 
                     .ds-day {
@@ -274,18 +279,19 @@
 
                     .date-strip-item.active::after {
                         content: '';
-                        display: block;
-                        width: 5px;
-                        height: 5px;
+                        position: absolute;
+                        bottom: 6px;
+                        left: 50%;
+                        transform: translateX(-50%);
+                        width: 4px;
+                        height: 4px;
                         background: #22c55e;
                         border-radius: 50%;
-                        margin-top: 5px;
-                        animation: pulseDot 1.8s infinite ease-in-out;
                     }
 
                     @keyframes pulseDot {
-                        0%, 100% { transform: scale(0.9); opacity: 0.8; }
-                        50% { transform: scale(1.4); opacity: 1; }
+                        0%, 100% { opacity: 0.65; }
+                        50% { opacity: 1; }
                     }
 
                     /* Next Class Hero Card */
@@ -914,11 +920,11 @@
                         font-size: 1.25rem;
                         line-height: 1;
                         margin-bottom: 2px;
-                        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), color 0.2s ease;
+                        transition: transform 0.2s ease-out, color 0.2s ease;
                     }
 
                     .dock-tab-btn:active {
-                        transform: scale(0.92);
+                        transform: scale(0.95);
                     }
 
                     .dock-tab-btn.active {
@@ -928,7 +934,6 @@
                     }
 
                     .dock-tab-btn.active i {
-                        transform: translateY(-1px);
                         color: #2563eb;
                     }
 
@@ -984,7 +989,7 @@
                         max-height: 88vh;
                         overflow-y: auto;
                         padding: 0 0 calc(28px + env(safe-area-inset-bottom, 16px));
-                        animation: springSlideUp 0.32s cubic-bezier(0.34, 1.2, 0.64, 1);
+                        animation: springSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1);
                         box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.2);
                     }
 
@@ -1403,20 +1408,47 @@
                                                     display: flex;
                                                     justify-content: space-between;
                                                     align-items: center;
-                                                    margin-bottom: 30px;
-                                                    padding: 10px 0;
+                                                    margin-bottom: 28px;
+                                                    padding: 6px 0;
                                                 }
 
                                                 .header-title {
                                                     font-size: 1.5rem;
                                                     font-weight: 800;
                                                     color: #0f172a;
+                                                    letter-spacing: -0.02em;
+                                                    line-height: 1.2;
                                                 }
 
                                                 .header-actions {
                                                     display: flex;
                                                     align-items: center;
-                                                    gap: 16px;
+                                                    gap: 12px;
+                                                }
+
+                                                .header-holidays-btn {
+                                                    height: 44px;
+                                                    padding: 0 16px;
+                                                    border-radius: 99px;
+                                                    background: #ffffff;
+                                                    border: 1px solid #e2e8f0;
+                                                    display: inline-flex;
+                                                    align-items: center;
+                                                    gap: 8px;
+                                                    font-size: 0.82rem;
+                                                    font-weight: 600;
+                                                    color: #334155;
+                                                    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+                                                    transition: all 0.2s ease;
+                                                    text-decoration: none;
+                                                    cursor: pointer;
+                                                }
+
+                                                .header-holidays-btn:hover {
+                                                    background: #f8fafc;
+                                                    border-color: #cbd5e1;
+                                                    color: #0f172a;
+                                                    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
                                                 }
 
                                                 .action-btn {
@@ -1424,21 +1456,21 @@
                                                     height: 44px;
                                                     border-radius: 50%;
                                                     background: #ffffff;
-                                                    border: none;
+                                                    border: 1px solid #e2e8f0;
                                                     display: flex;
                                                     align-items: center;
                                                     justify-content: center;
                                                     color: #64748b;
                                                     font-size: 1.1rem;
-                                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
-                                                    transition: all 0.2s;
+                                                    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+                                                    transition: all 0.2s ease;
                                                     position: relative;
                                                 }
 
                                                 .action-btn:hover {
                                                     color: #0f172a;
-                                                    transform: translateY(-2px);
-                                                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
+                                                    border-color: #cbd5e1;
+                                                    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
                                                 }
 
                                                 .action-btn.has-dot::after {
@@ -1456,20 +1488,22 @@
                                                 .user-profile {
                                                     display: flex;
                                                     align-items: center;
-                                                    gap: 12px;
+                                                    gap: 10px;
                                                     background: #ffffff;
-                                                    padding: 6px 16px 6px 6px;
+                                                    padding: 4px 14px 4px 4px;
                                                     border-radius: 99px;
-                                                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+                                                    border: 1px solid #e2e8f0;
+                                                    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
                                                     cursor: pointer;
-                                                    transition: all 0.2s;
+                                                    transition: all 0.2s ease;
                                                     text-decoration: none;
                                                     color: inherit;
+                                                    min-height: 44px;
                                                 }
 
                                                 .user-profile:hover, .user-profile:focus {
-                                                    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.05);
-                                                    transform: translateY(-1px);
+                                                    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.06);
+                                                    border-color: #cbd5e1;
                                                 }
 
                                                 .user-profile.dropdown-toggle::after {
@@ -1483,11 +1517,12 @@
                                                 }
 
                                                 .user-avatar {
-                                                    width: 40px;
-                                                    height: 40px;
+                                                    width: 36px;
+                                                    height: 36px;
                                                     border-radius: 50%;
                                                     background: #f1f5f9;
                                                     overflow: hidden;
+                                                    flex-shrink: 0;
                                                 }
 
                                                 .user-avatar img {
@@ -1499,10 +1534,11 @@
                                                 .user-info-text {
                                                     display: flex;
                                                     flex-direction: column;
+                                                    justify-content: center;
                                                 }
 
                                                 .user-name {
-                                                    font-size: 0.85rem;
+                                                    font-size: 0.84rem;
                                                     font-weight: 700;
                                                     color: #0f172a;
                                                     line-height: 1.2;
@@ -1511,6 +1547,11 @@
                                                 .user-role {
                                                     font-size: 0.7rem;
                                                     color: #64748b;
+                                                    display: inline-flex;
+                                                    align-items: center;
+                                                    gap: 4px;
+                                                    margin-top: 1px;
+                                                    line-height: 1;
                                                 }
 
                                                 /* METRIC CARDS */
@@ -1704,32 +1745,31 @@
                                                     flex: 1;
                                                     position: relative;
                                                     min-height: 200px;
-                                                    /* Placeholder for beautiful custom CSS chart */
-                                                    background-image:
-                                                        linear-gradient(to right, #f8fafc 1px, transparent 1px),
-                                                        linear-gradient(to bottom, #f8fafc 1px, transparent 1px);
-                                                    background-size: calc(100% / 6) calc(100% / 4);
+                                                    border-bottom: 1px dashed #e2e8f0;
+                                                    background-image: linear-gradient(to bottom, #f1f5f9 1px, transparent 1px);
+                                                    background-size: 100% 25%;
                                                     display: flex;
                                                     align-items: flex-end;
-                                                    justify-content: space-between;
-                                                    padding: 20px 0 0;
+                                                    justify-content: space-around;
+                                                    padding: 24px 16px 0;
                                                 }
 
                                                 .chart-bar-group {
-                                                    width: calc(100% / 6 - 20px);
+                                                    flex: 1;
+                                                    max-width: 64px;
                                                     height: 100%;
                                                     display: flex;
                                                     align-items: flex-end;
                                                     justify-content: center;
-                                                    gap: 6px;
+                                                    gap: 8px;
                                                     position: relative;
                                                 }
 
                                                 .chart-bar {
                                                     width: 14px;
-                                                    border-radius: 99px;
+                                                    border-radius: 6px 6px 0 0;
                                                     position: relative;
-                                                    animation: growUp 1s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
+                                                    animation: growUp 0.8s cubic-bezier(0.34, 1.12, 0.64, 1) forwards;
                                                     transform-origin: bottom;
                                                 }
 
@@ -1749,17 +1789,21 @@
 
                                                 .chart-labels {
                                                     display: flex;
-                                                    justify-content: space-between;
-                                                    margin-top: 16px;
-                                                    padding: 0 10px;
+                                                    justify-content: space-around;
+                                                    margin-top: 12px;
+                                                    padding: 0 16px;
                                                 }
 
                                                 .chart-label {
-                                                    font-size: 0.7rem;
-                                                    color: #94a3b8;
-                                                    font-weight: 600;
+                                                    font-size: 0.75rem;
+                                                    color: #64748b;
+                                                    font-weight: 700;
                                                     text-align: center;
-                                                    width: calc(100% / 6);
+                                                    flex: 1;
+                                                    max-width: 64px;
+                                                    overflow: hidden;
+                                                    text-overflow: ellipsis;
+                                                    white-space: nowrap;
                                                 }
 
                                                 /* SEGMENTATION CARD (Courses) */
@@ -2114,8 +2158,12 @@
                                                      color: #64748b;
                                                  }
 
+                                                 .timetable-table td.timetable-slot-cell,
                                                  .timetable-slot-cell {
                                                      min-width: 170px;
+                                                     height: 1px;
+                                                     vertical-align: top;
+                                                     padding: 10px;
                                                      background: #ffffff;
                                                      transition: background 0.15s ease, opacity 0.2s ease;
                                                  }
@@ -2144,8 +2192,7 @@
                                                  }
 
                                                  .timetable-course-card:hover {
-                                                     transform: translateY(-2px);
-                                                     box-shadow: 0 8px 20px rgba(37, 99, 235, 0.1);
+                                                     box-shadow: 0 6px 16px rgba(37, 99, 235, 0.12);
                                                      border-color: #93c5fd;
                                                  }
 
@@ -2207,7 +2254,8 @@
 
                                                  .tt-actions-row {
                                                      display: flex;
-                                                     gap: 6px;
+                                                     flex-wrap: wrap;
+                                                     gap: 4px;
                                                      padding-top: 8px;
                                                      border-top: 1px dashed #edf2f7;
                                                      align-items: center;
@@ -2242,10 +2290,11 @@
                                                  .timetable-empty-slot {
                                                      height: 100%;
                                                      min-height: 80px;
+                                                     box-sizing: border-box;
                                                      display: flex;
                                                      align-items: center;
                                                      justify-content: center;
-                                                     border: 1px dashed #e2e8f0;
+                                                     border: 1.5px dashed #e2e8f0;
                                                      border-radius: 12px;
                                                      background: #fafbfc;
                                                      color: #94a3b8;
@@ -2260,21 +2309,21 @@
                                                  }
 
                                                  .timetable-stats-bar {
-                                                     display: flex;
+                                                     display: grid;
+                                                     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
                                                      gap: 16px;
-                                                     flex-wrap: wrap;
                                                      margin-bottom: 20px;
                                                  }
 
                                                  .tt-stat-chip {
                                                      background: #ffffff;
                                                      border: 1px solid #e2e8f0;
-                                                     border-radius: 14px;
-                                                     padding: 10px 16px;
+                                                     border-radius: 16px;
+                                                     padding: 12px 18px;
                                                      display: flex;
                                                      align-items: center;
-                                                     gap: 12px;
-                                                     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+                                                     gap: 14px;
+                                                     box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
                                                  }
 
                                                  .tt-stat-icon {
@@ -2310,12 +2359,10 @@
                                                      transition: all 0.15s ease;
                                                  }
         .premium-registration-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.07);
+            box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05);
             padding: 24px;
             max-width: 480px;
             width: 100%;
@@ -2325,17 +2372,16 @@
             gap: 20px;
             position: relative;
             overflow: hidden;
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s ease;
+            transition: box-shadow 0.2s ease;
         }
         .premium-registration-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 40px rgba(31, 38, 135, 0.12);
+            box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08);
         }
         .premium-registration-card::before {
             content: '';
             position: absolute;
             top: 0; left: 0; right: 0; height: 120px;
-            background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(16, 185, 129, 0.05) 100%);
+            background: linear-gradient(135deg, rgba(14, 165, 233, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
             z-index: 0;
             pointer-events: none;
         }
@@ -2359,25 +2405,16 @@
         .calendar-icon-wrapper {
             position: relative;
             background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
-            width: 64px;
-            height: 64px;
-            border-radius: 14px;
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 28px;
-            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
-        }
-        .calendar-icon-wrapper .sparkles {
-            position: absolute;
-            top: -8px; right: -8px;
-            font-size: 16px;
-            animation: float-sparkle 3s ease-in-out infinite;
-        }
-        @keyframes float-sparkle {
-            0%, 100% { transform: translateY(0) scale(1); opacity: 0.8; }
-            50% { transform: translateY(-4px) scale(1.1); opacity: 1; }
+            font-size: 26px;
+            box-shadow: 0 4px 14px rgba(14, 165, 233, 0.25);
+            flex-shrink: 0;
         }
         .reg-meta-list {
             display: flex;
@@ -2408,8 +2445,8 @@
             transition: all 0.2s ease;
         }
         .btn-premium-submit:hover:not(:disabled) {
-            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
-            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(14, 165, 233, 0.45);
+            filter: brightness(1.05);
             color: white;
         }
         .btn-premium-submit:disabled {
@@ -2419,9 +2456,25 @@
             transform: none;
         }
     </style>
-        </head>
+            <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/sonner.css">
+</head>
 
         <body>
+
+    <%-- SONNER TOAST NOTIFICATIONS --%>
+    <c:if test="${param.twoFactorUpdated == 'true'}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) is now enabled for your account."></div>
+    </c:if>
+    <c:if test="${param.twoFactorUpdated == 'false'}">
+        <div class="sonner-flash-trigger d-none" data-type="info" data-title="Security Updated" data-message="Two-Factor Authentication (2FA) has been disabled for your account."></div>
+    </c:if>
+    <c:if test="${not empty successMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="success" data-title="Success" data-message="${fn:escapeXml(successMessage)}"></div>
+    </c:if>
+    <c:if test="${not empty errorMessage}">
+        <div class="sonner-flash-trigger d-none" data-type="error" data-title="Error" data-message="${fn:escapeXml(errorMessage)}"></div>
+    </c:if>
+
 
                 <c:set var="earnedCredits" value="0" />
                 <c:forEach var="gradeItem" items="${grades}">
@@ -2489,9 +2542,9 @@
                                                                 </div>
 
                                                                 <div class="header-actions">
-                                                                    <button type="button" class="btn btn-outline-light text-dark border bg-white rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-2 shadow-xs" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
+                                                                    <button type="button" class="header-holidays-btn" onclick="switchDesktopTab('holidays', document.getElementById('tab-holidays'))" title="View School Holidays">
                                                                         <i class="bi bi-calendar-heart text-danger"></i>
-                                                                        <span class="small">Holidays</span>
+                                                                        <span>School Holidays</span>
                                                                     </button>
 
                                                                     <div class="dropdown">
@@ -2506,7 +2559,7 @@
                                                                                     </c:otherwise>
                                                                                 </c:choose>
                                                                             </div>
-                                                                            <div class="user-info-text pe-2">
+                                                                            <div class="user-info-text pe-1">
                                                                                 <span class="user-name">${user.fullName}</span>
                                                                                 <span class="user-role">${user.formattedIdentifier} <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill ms-1 px-2 py-0" style="font-size: 0.65rem; font-weight: 700;">${user.role}</span> <i class="bi bi-chevron-down ms-1" style="font-size:0.65rem;"></i></span>
                                                                             </div>
@@ -2573,38 +2626,10 @@
                                                             </header>
 
                                                             <%-- ALERTS --%>
-                                                                <c:if test="${param.twoFactorUpdated == 'true'}">
-                                                                    <div
-                                                                        class="alert alert-success alert-dismissible fade show rounded-4">
-                                                                        <i class="bi bi-shield-check me-2"></i>2FA is
-                                                                        now <strong>enabled</strong>.<button
-                                                                            type="button" class="btn-close"
-                                                                            data-bs-dismiss="alert"></button></div>
-                                                                </c:if>
-                                                                <c:if test="${param.twoFactorUpdated == 'false'}">
-                                                                    <div
-                                                                        class="alert alert-info alert-dismissible fade show rounded-4">
-                                                                        <i class="bi bi-shield-slash me-2"></i>2FA has
-                                                                        been <strong>disabled</strong>.<button
-                                                                            type="button" class="btn-close"
-                                                                            data-bs-dismiss="alert"></button></div>
-                                                                </c:if>
-                                                                <c:if test="${not empty successMessage}">
-                                                                    <div
-                                                                        class="alert alert-success alert-dismissible fade show rounded-4">
-                                                                        <i
-                                                                            class="bi bi-check-circle-fill me-2"></i>${successMessage}<button
-                                                                            type="button" class="btn-close"
-                                                                            data-bs-dismiss="alert"></button></div>
-                                                                </c:if>
-                                                                <c:if test="${not empty errorMessage}">
-                                                                    <div
-                                                                        class="alert alert-danger alert-dismissible fade show rounded-4">
-                                                                        <i
-                                                                            class="bi bi-exclamation-triangle-fill me-2"></i>${errorMessage}<button
-                                                                            type="button" class="btn-close"
-                                                                            data-bs-dismiss="alert"></button></div>
-                                                                </c:if>
+                                                                
+                                                                
+                                                                
+                                                                
 
                                                                 <c:choose>
                                                                     <c:when test="${empty user.studentSchoolId}">
@@ -3076,7 +3101,6 @@
                                                                                                                     <div class="reg-term-box mt-2">
                                                                                                                         <div class="calendar-icon-wrapper flex-shrink-0">
                                                                                                                             <i class="bi bi-calendar3"></i>
-                                                                                                                            <div class="sparkles">✨</div>
                                                                                                                         </div>
                                                                                                                         <div class="term-details text-start">
                                                                                                                             <div class="text-uppercase fw-bold text-primary mb-1" style="font-size:0.7rem; letter-spacing:1px;">Current Term</div>
@@ -3246,11 +3270,11 @@
                                                                                             <td><span class="tc-badge info"><i class="bi bi-geo-alt-fill me-1"></i>${enrollment.room}</span></td>
                                                                                             <td><span class="tc-badge success">Enrolled</span></td>
                                                                                             <td class="text-end">
-                                                                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-2.5 py-1 fw-semibold me-1" style="font-size:0.75rem;" onclick="openStudentCourseSessions('${enrollment.id}')">
-                                                                                                    <i class="bi bi-calendar3-range me-1"></i>15 Sessions
+                                                                                                <button type="button" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 fw-semibold me-1 d-inline-flex align-items-center gap-1" style="font-size:0.75rem;" onclick="openStudentCourseSessions('${enrollment.id}')">
+                                                                                                    <i class="bi bi-calendar3-range"></i> 15 Sessions
                                                                                                 </button>
-                                                                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold" data-section-id="${enrollment.classSectionId}" data-course-code="${enrollment.courseCode}" data-course-title="${fn:escapeXml(enrollment.courseTitle)}" onclick="handleDropCourseBtn(this)" style="font-size:0.75rem;">
-                                                                                                    <i class="bi bi-x-circle me-1"></i>Drop
+                                                                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3 py-1 fw-semibold d-inline-flex align-items-center gap-1" data-section-id="${enrollment.classSectionId}" data-course-code="${enrollment.courseCode}" data-course-title="${fn:escapeXml(enrollment.courseTitle)}" onclick="handleDropCourseBtn(this)" style="font-size:0.75rem;">
+                                                                                                    <i class="bi bi-x-circle"></i> Drop
                                                                                                 </button>
                                                                                             </td>
                                                                                         </tr>
@@ -3349,23 +3373,23 @@
                                     <td class="text-center">
                                         <c:choose>
                                             <c:when test="${grade.letterGrade == 'A' || grade.letterGrade == 'A-'}">
-                                                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill fs-6">${grade.letterGrade}</span>
+                                                <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-1 rounded-pill" style="font-size: 0.82rem;">${grade.letterGrade}</span>
                                             </c:when>
                                             <c:when test="${grade.letterGrade == 'B' || grade.letterGrade == 'B+' || grade.letterGrade == 'B-'}">
-                                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-2 rounded-pill fs-6">${grade.letterGrade}</span>
+                                                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold px-3 py-1 rounded-pill" style="font-size: 0.82rem;">${grade.letterGrade}</span>
                                             </c:when>
                                             <c:when test="${grade.letterGrade == 'F'}">
-                                                <span class="badge bg-danger bg-opacity-10 text-danger fw-bold px-3 py-2 rounded-pill fs-6">${grade.letterGrade}</span>
+                                                <span class="badge bg-danger bg-opacity-10 text-danger fw-bold px-3 py-1 rounded-pill" style="font-size: 0.82rem;">${grade.letterGrade}</span>
                                             </c:when>
                                             <c:when test="${grade.letterGrade != 'N/A' && not empty grade.letterGrade}">
-                                                <span class="badge bg-warning bg-opacity-25 text-dark fw-bold px-3 py-2 rounded-pill fs-6">${grade.letterGrade}</span>
+                                                <span class="badge bg-warning bg-opacity-25 text-dark fw-bold px-3 py-1 rounded-pill" style="font-size: 0.82rem;">${grade.letterGrade}</span>
                                             </c:when>
                                             <c:otherwise>
                                                 <span class="text-muted fw-bold">-</span>
                                             </c:otherwise>
                                         </c:choose>
                                     </td>
-                                    <td class="text-end fw-bolder text-dark fs-5">
+                                    <td class="text-end fw-bold text-dark" style="font-size: 0.95rem;">
                                         <c:choose>
                                             <c:when test="${grade.letterGrade != 'N/A' && not empty grade.letterGrade}">
                                                 ${grade.gpaPoint}
@@ -3405,10 +3429,10 @@
 
     <div class="row g-4">
         <div class="col-lg-6">
-            <div class="table-card mb-4">
+            <div class="table-card h-100 mb-0">
                 <h3 class="h5 fw-bold text-dark mb-3"><i class="bi bi-person-badge text-primary me-2"></i>Profile Information</h3>
                 <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
-                    <div class="user-avatar" style="width:64px; height:64px; border-radius:20px;">
+                    <div class="user-avatar" style="width:56px; height:56px; border-radius:18px;">
                         <c:choose>
                             <c:when test="${user.gender == 'FEMALE'}">
                                 <img src="${pageContext.request.contextPath}/static/images/default_female.svg" alt="Avatar">
@@ -3424,13 +3448,13 @@
                     </div>
                 </div>
 
-                <form action="${pageContext.request.contextPath}/student" method="POST" class="p-3 bg-light rounded-4 border">
+                <form action="${pageContext.request.contextPath}/student" method="POST">
                     <input type="hidden" name="action" value="updateProfile">
                     <div class="mb-3">
                         <label class="form-label fw-bold small text-muted">Student ID</label>
                         <input type="text" class="form-control" name="studentId" value="${user.userIdentifier.startsWith('9') ? '' : fn:escapeXml(user.userIdentifier)}" required pattern="[0-8][0-9]{7}" title="8-digit Student ID (numbers only, cannot start with 9)" ${not user.userIdentifier.startsWith('9') ? 'readonly style="background-color: #e9ecef; cursor: not-allowed;"' : ''}>
                     </div>
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label fw-bold small text-muted">Current Term</label>
                         <select class="form-select" name="currentTermId" required ${user.currentTermId != null and user.currentTermId > 0 ? 'style="pointer-events: none; background-color: #e9ecef;" tabindex="-1"' : ''}>
                             <c:if test="${empty user.currentTermId}">
@@ -3441,30 +3465,44 @@
                             </c:forEach>
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 fw-bold">Update Profile</button>
+                    <button type="submit" class="btn btn-primary btn-sm rounded-pill px-4 py-2 fw-bold">Update Profile</button>
                 </form>
             </div>
         </div>
 
         <div class="col-lg-6">
-            <div class="table-card mb-4">
-                <h3 class="h5 fw-bold text-dark mb-3"><i class="bi bi-shield-lock text-primary me-2"></i>Security & Authentication</h3>
-                
-                <form action="${pageContext.request.contextPath}/auth/update-2fa" method="POST" class="p-3 bg-light rounded-4 border mb-4">
-                    <input type="hidden" name="redirect" value="/student/dashboard?tab=settings">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <label for="desktopTwoFactorSwitch" class="fw-bold text-dark mb-0 cursor-pointer">Two-Factor Authentication (2FA)</label>
-                            <p class="small text-muted mb-0 mt-1">Receive an OTP security code via email each time you log in.</p>
+            <div class="table-card h-100 mb-0 d-flex flex-column justify-content-between">
+                <div>
+                    <h3 class="h5 fw-bold text-dark mb-3"><i class="bi bi-shield-lock text-primary me-2"></i>Security & Authentication</h3>
+                    
+                    <form action="${pageContext.request.contextPath}/auth/update-2fa" method="POST" class="p-3 bg-light rounded-4 border mb-4">
+                        <input type="hidden" name="redirect" value="/student/dashboard?tab=settings">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <label for="desktopTwoFactorSwitch" class="fw-bold text-dark mb-0 cursor-pointer">Two-Factor Authentication (2FA)</label>
+                                <p class="small text-muted mb-0 mt-1">Receive an OTP security code via email each time you log in.</p>
+                            </div>
+                            <div class="form-check form-switch fs-4 mb-0">
+                                <input class="form-check-input" type="checkbox" role="switch" id="desktopTwoFactorSwitch" name="twoFactorEnabled" value="true" ${user.twoFactorEnabled ? 'checked' : ''} onchange="this.form.submit()">
+                                <c:if test="${user.twoFactorEnabled}">
+                                    <input type="hidden" name="twoFactorEnabled" value="false">
+                                </c:if>
+                            </div>
                         </div>
-                        <div class="form-check form-switch fs-4 mb-0">
-                            <input class="form-check-input" type="checkbox" role="switch" id="desktopTwoFactorSwitch" name="twoFactorEnabled" value="true" ${user.twoFactorEnabled ? 'checked' : ''} onchange="this.form.submit()">
-                            <c:if test="${user.twoFactorEnabled}">
-                                <input type="hidden" name="twoFactorEnabled" value="false">
-                            </c:if>
+                    </form>
+                </div>
+
+                <div class="p-3 rounded-4 border" style="background-color: #f0fdf4; border-color: #bbf7d0 !important;">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="background-color: #dcfce7; width: 40px; height: 40px;">
+                            <i class="bi bi-shield-check text-success fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-success" style="font-size: 0.88rem;">Session Protected</div>
+                            <div class="text-muted small">Your UniTRS student portal account credentials and active session are encrypted.</div>
                         </div>
                     </div>
-                </form>
+                </div>
             </div>
         </div>
     </div>
@@ -3511,30 +3549,10 @@
                                                 <%--==================================================================--%>
                                                     <div class="d-block d-md-none mobile-app-container">
 
-                                                        <c:if test="${param.twoFactorUpdated == 'true'}">
-                                                            <div class="alert alert-success alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small shadow-sm">
-                                                                <i class="bi bi-shield-check me-1"></i>2FA <strong>enabled</strong>.
-                                                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                            </div>
-                                                        </c:if>
-                                                        <c:if test="${param.twoFactorUpdated == 'false'}">
-                                                            <div class="alert alert-info alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small shadow-sm">
-                                                                <i class="bi bi-shield-slash me-1"></i>2FA <strong>disabled</strong>.
-                                                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                            </div>
-                                                        </c:if>
-                                                        <c:if test="${not empty successMessage}">
-                                                            <div class="alert alert-success alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small shadow-sm">
-                                                                <i class="bi bi-check-circle-fill me-1"></i>${successMessage}
-                                                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                            </div>
-                                                        </c:if>
-                                                        <c:if test="${not empty errorMessage}">
-                                                            <div class="alert alert-danger alert-dismissible fade show rounded-4 py-2 px-3 mb-3 small shadow-sm">
-                                                                <i class="bi bi-exclamation-triangle-fill me-1"></i>${errorMessage}
-                                                                <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                            </div>
-                                                        </c:if>
+                                                        
+                                                        
+                                                        
+                                                        
 
                                                         <c:choose>
                                                             <c:when test="${empty user.studentSchoolId}">
@@ -3573,20 +3591,22 @@
                                                                                 </c:otherwise>
                                                                             </c:choose>
                                                                         </div>
-                                                                        <div>
-                                                                            <div class="mobile-user-greeting">Hello, ${user.fullName}</div>
-                                                                            <span class="mobile-badge-pill">
+                                                                        <div class="overflow-hidden" style="min-width: 0;">
+                                                                            <div class="mobile-user-greeting text-truncate" title="${user.fullName}">Hello, ${user.fullName}</div>
+                                                                            <span class="mobile-badge-pill text-truncate" style="max-width: 170px;">
                                                                                 <i class="bi bi-mortarboard-fill text-primary" style="font-size:0.68rem;"></i>
                                                                                 ${not empty studentSchool ? studentSchool.schoolName : 'UniTRS Student'}
                                                                             </span>
                                                                         </div>
                                                                     </div>
-                                                                    <button class="mobile-top-action-btn me-1" type="button" data-bs-toggle="modal" data-bs-target="#schoolHolidaysModal" aria-label="School Holidays">
-                                                                        <i class="bi bi-calendar-heart text-danger"></i>
-                                                                    </button>
-                                                                    <button class="mobile-top-action-btn" type="button" onclick="switchMobileTab('profile')" aria-label="Go to Student Profile and Settings">
-                                                                        <i class="bi bi-person-gear"></i>
-                                                                    </button>
+                                                                    <div class="d-flex align-items-center gap-2 flex-shrink-0">
+                                                                        <button class="mobile-top-action-btn" type="button" data-bs-toggle="modal" data-bs-target="#schoolHolidaysModal" aria-label="School Holidays" title="School Holidays">
+                                                                            <i class="bi bi-calendar-heart text-danger"></i>
+                                                                        </button>
+                                                                        <button class="mobile-top-action-btn" type="button" onclick="switchMobileTab('profile')" aria-label="Go to Student Profile and Settings" title="Settings">
+                                                                            <i class="bi bi-person-gear"></i>
+                                                                        </button>
+                                                                    </div>
                                                                 </header>
 
                                                                 <%--===== HOME SUB-VIEW =====--%>
@@ -3871,8 +3891,8 @@
                                                                                             <span class="small text-primary fw-semibold" style="font-size:0.72rem;"><i class="bi bi-calendar3-range me-1"></i>Tap for 15-Week Schedule</span>
                                                                                             <div class="d-flex align-items-center gap-2">
                                                                                                 <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-2 py-1" style="font-size:0.7rem;"><i class="bi bi-check2 me-1"></i>Enrolled</span>
-                                                                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 fw-semibold" style="font-size:0.7rem; min-height:26px;" data-section-id="${enrollment.classSectionId}" data-course-code="${enrollment.courseCode}" data-course-title="${fn:escapeXml(enrollment.courseTitle)}" onclick="event.stopPropagation(); handleDropCourseBtn(this)">
-                                                                                                    <i class="bi bi-x me-1"></i>Drop
+                                                                                                <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2.5 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size:0.7rem; min-height:26px;" data-section-id="${enrollment.classSectionId}" data-course-code="${enrollment.courseCode}" data-course-title="${fn:escapeXml(enrollment.courseTitle)}" onclick="event.stopPropagation(); handleDropCourseBtn(this)">
+                                                                                                    <i class="bi bi-x"></i>Drop
                                                                                                 </button>
                                                                                             </div>
                                                                                         </div>
@@ -4068,9 +4088,8 @@
                                                                                                 </div>
 
                                                                                                 <div class="reg-term-box mt-1 px-3 py-3">
-                                                                                                    <div class="calendar-icon-wrapper flex-shrink-0" style="width: 50px; height: 50px; font-size: 22px;">
+                                                                                                    <div class="calendar-icon-wrapper flex-shrink-0" style="width: 48px; height: 48px; font-size: 22px;">
                                                                                                         <i class="bi bi-calendar3"></i>
-                                                                                                        <div class="sparkles" style="font-size: 12px; top:-5px; right:-5px;">✨</div>
                                                                                                     </div>
                                                                                                     <div class="term-details text-start">
                                                                                                         <div class="text-uppercase fw-bold text-primary mb-1" style="font-size:0.65rem; letter-spacing:1px;">Current Term</div>
@@ -4270,7 +4289,7 @@
                                                                                     </c:forEach>
                                                                                 </select>
                                                                             </div>
-                                                                            <button type="submit" class="btn btn-primary w-100 fw-bold rounded-3">Update Profile</button>
+                                                                            <button type="submit" class="btn btn-primary w-100 fw-bold rounded-pill py-2.5 shadow-xs">Update Profile</button>
                                                                         </form>
                                                                     </div>
 
@@ -4301,7 +4320,7 @@
                                                                         </div>
                                                                     </div>
 
-                                                                    <button type="button" onclick="document.getElementById('logoutConfirmModal').style.display='flex'" class="btn btn-outline-danger w-100 rounded-3 py-2 fw-semibold" style="min-height:44px;display:flex;align-items:center;justify-content:center;">
+                                                                    <button type="button" onclick="document.getElementById('logoutConfirmModal').style.display='flex'" class="btn btn-outline-danger w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-2" style="min-height:44px;">
                                                                         <i class="bi bi-box-arrow-right me-2"></i>Sign Out
                                                                     </button>
                                                                 </section>
@@ -4359,13 +4378,13 @@
                                                                             <div class="sheet-header-meta"
                                                                                 id="sheetCourseMeta"></div>
                                                                             <button type="button"
-                                                                                class="btn btn-sm btn-primary rounded-pill mt-3 w-100 fw-bold shadow-xs"
+                                                                                class="btn btn-sm btn-primary rounded-pill mt-3 w-100 fw-bold shadow-xs d-inline-flex align-items-center justify-content-center gap-1.5 py-2"
                                                                                 onclick="closeCourseModal(); openStudentCourseSessions(_lastActiveEnrollmentId);"><i
-                                                                                    class="bi bi-calendar3-range me-1.5"></i>View 15-Week Sessions</button>
+                                                                                    class="bi bi-calendar3-range"></i>View 15-Week Sessions</button>
                                                                             <button type="button"
-                                                                                class="btn btn-sm btn-light rounded-3 mt-2 w-100"
+                                                                                class="btn btn-sm btn-light border rounded-pill mt-2 w-100 fw-semibold text-secondary d-inline-flex align-items-center justify-content-center gap-1 py-2"
                                                                                 onclick="closeCourseModal()"><i
-                                                                                    class="bi bi-x me-1"></i>Close</button>
+                                                                                    class="bi bi-x-lg" style="font-size:0.75rem;"></i>Close</button>
                                                                         </div>
                                                                         <div class="sheet-body">
                                                                             <div class="sheet-section-label">Score
@@ -4422,8 +4441,8 @@
 
                                                                 <div class="modal fade" id="dropConfirmModal" tabindex="-1" aria-labelledby="dropConfirmModalLabel" aria-hidden="true">
                                                                     <div class="modal-dialog modal-dialog-centered modal-sm">
-                                                                        <div class="modal-content border-0 shadow">
-                                                                            <div class="modal-header border-bottom py-2">
+                                                                        <div class="modal-content rounded-4 border-0 shadow">
+                                                                            <div class="modal-header border-0 pb-0">
                                                                                 <h6 class="modal-title fw-bold text-danger" id="dropConfirmModalLabel">
                                                                                     <i class="bi bi-trash3 me-2"></i>Drop Course
                                                                                 </h6>
@@ -4972,8 +4991,8 @@
                                                                                                 tableHtml += '<div class="tt-prof-row" title="Professor ' + sec.professor + '"><i class="bi bi-person-fill text-primary"></i> <span>' + sec.professor + '</span></div>';
                                                                                             }
                                                                                             tableHtml += '<div class="tt-actions-row justify-content-between align-items-center">';
-                                                                                            tableHtml += '<button type="button" class="btn btn-sm btn-primary rounded-pill px-2 py-0 fw-semibold" style="font-size:0.7rem; min-height:24px;" onclick="event.stopPropagation(); openStudentCourseSessions(' + sec.id + ')"><i class="bi bi-calendar3-range me-1"></i>15 Sessions</button>';
-                                                                                            tableHtml += '<button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-0 fw-semibold" style="font-size:0.7rem; min-height:24px;" data-section-id="' + sec.classSectionId + '" data-course-code="' + sec.code.replace(/"/g, "&quot;") + '" data-course-title="' + sec.title.replace(/"/g, "&quot;") + '" onclick="event.stopPropagation(); handleDropCourseBtn(this)"><i class="bi bi-trash3 me-1"></i>Drop</button>';
+                                                                                            tableHtml += '<button type="button" class="btn btn-sm btn-primary rounded-pill px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size:0.7rem; min-height:26px;" onclick="event.stopPropagation(); openStudentCourseSessions(' + sec.id + ')"><i class="bi bi-calendar3-range"></i>15 Sessions</button>';
+                                                                                            tableHtml += '<button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1 fw-semibold d-inline-flex align-items-center gap-1" style="font-size:0.7rem; min-height:26px;" data-section-id="' + sec.classSectionId + '" data-course-code="' + sec.code.replace(/"/g, "&quot;") + '" data-course-title="' + sec.title.replace(/"/g, "&quot;") + '" onclick="event.stopPropagation(); handleDropCourseBtn(this)"><i class="bi bi-trash3"></i>Drop</button>';
                                                                                             tableHtml += '</div>';
                                                                                             tableHtml += '</div>';
                                                                                         });
@@ -5219,8 +5238,8 @@
                                 </c:forEach>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold rounded-3 mb-2" onclick="sessionStorage.removeItem('dismissProfileModal');">Save Profile</button>
-                        <button type="button" class="btn btn-light btn-lg w-100 fw-bold rounded-3" onclick="dismissProfileModal()">Do it later</button>
+                        <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold rounded-pill py-2.5 mb-2 shadow-xs" onclick="sessionStorage.removeItem('dismissProfileModal');">Save Profile</button>
+                        <button type="button" class="btn btn-light border btn-lg w-100 fw-semibold rounded-pill py-2.5 text-secondary" onclick="dismissProfileModal()">Do it later</button>
                     </form>
                 </div>
             </div>
@@ -5256,7 +5275,7 @@
 </c:if>
 
 <div id="logoutConfirmModal" style="display:none; position:fixed; inset:0; z-index:9999; align-items:center; justify-content:center; background:rgba(15,23,42,0.55); backdrop-filter:blur(4px);" aria-modal="true" role="dialog" aria-labelledby="logoutModalTitle">
-        <div style="background:#fff; border-radius:24px; padding:2.5rem 3rem; max-width:480px; width:90%; box-shadow:0 24px 64px -12px rgba(0,0,0,0.35); text-align:center; animation:slideUpModal 0.25s cubic-bezier(.34,1.56,.64,1);">
+        <div style="background:#fff; border-radius:24px; padding:2.5rem 3rem; max-width:480px; width:90%; box-shadow:0 24px 64px -12px rgba(0,0,0,0.35); text-align:center; animation:slideUpModal 0.22s cubic-bezier(0.16, 1, 0.3, 1);">
             <div style="width:64px;height:64px;border-radius:50%;background:#fee2e2;display:flex;align-items:center;justify-content:center;margin:0 auto 1.25rem;">
                 <i class="bi bi-box-arrow-right" style="font-size:1.75rem;color:#dc2626;"></i>
             </div>
@@ -5282,6 +5301,7 @@ document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') document.getElementById('logoutConfirmModal').style.display = 'none';
 });
 </script>
+    <script src="${pageContext.request.contextPath}/static/js/sonner.js"></script>
 </body>
 
         </html>
